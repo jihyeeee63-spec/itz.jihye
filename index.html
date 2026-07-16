@@ -3,157 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jihye Ledger · 지혜의 가계부</title>
+  <title>Jihye Apps · 지혜의 프로그램</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@400;700&family=Nunito:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@400;700&family=Nunito:wght@600;700;800&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink: #2d2438;
+      --muted: #7a6f86;
+      --card: rgba(255, 255, 255, 0.82);
+      --shadow: 0 18px 40px rgba(45, 36, 56, 0.12);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Nunito", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(155deg, #ffe8d6 0%, #ffd1dc 45%, #d4f1f4 100%);
+      padding: 1.5rem;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(42px);
+      opacity: 0.5;
+      animation: float 12s ease-in-out infinite;
+    }
+
+    .blob.a { width: 280px; height: 280px; background: #ffb4a2; top: -60px; left: -40px; }
+    .blob.b { width: 240px; height: 240px; background: #a8e6cf; bottom: 8%; right: -50px; animation-delay: -4s; }
+    .blob.c { width: 180px; height: 180px; background: #bde0fe; top: 42%; left: 35%; animation-delay: -7s; }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(16px, -20px); }
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      width: min(880px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      border-radius: 28px;
+      padding: 1.6rem 1.3rem 1.4rem;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      margin-bottom: 1.2rem;
+      animation: pop 0.45s ease both;
+    }
+
+    .avatar {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 0.7rem;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      font-size: 2.1rem;
+      background: linear-gradient(145deg, #ffd6e0, #ffe8c8);
+    }
+
+    .brand {
+      font-family: "Dongle", sans-serif;
+      font-size: 1.8rem;
+      color: #e84855;
+      line-height: 1;
+    }
+
+    h1 {
+      font-size: clamp(1.4rem, 4vw, 1.9rem);
+      font-weight: 800;
+      margin: 0.2rem 0;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      gap: 0.35rem;
+      margin-top: 1rem;
+      padding: 0.28rem;
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 999px;
+      border: 1px solid rgba(45, 36, 56, 0.08);
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .lang-btn.active {
+      background: linear-gradient(135deg, #ff8fab, #ff6b6b);
+      color: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.9rem;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      text-decoration: none;
+      color: inherit;
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 1.25rem 1.15rem;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      animation: pop 0.55s ease both;
+    }
+
+    .card:nth-child(2) { animation-delay: 0.06s; }
+    .card:nth-child(3) { animation-delay: 0.12s; }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 22px 44px rgba(45, 36, 56, 0.16);
+    }
+
+    .card .icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 1.7rem;
+    }
+
+    .card.todo .icon { background: #ffe3ec; }
+    .card.weather .icon { background: #d9f0ff; }
+    .card.ledger .icon { background: #d8f3ef; }
+
+    .card h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .card .go {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #e84855;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 1.4rem;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      animation: pop 0.65s ease both;
+    }
+
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
   <div class="bg" aria-hidden="true">
-    <div class="blob blob-a"></div>
-    <div class="blob blob-b"></div>
-    <div class="blob blob-c"></div>
-    <div class="sparkles" id="sparkles"></div>
+    <div class="blob a"></div>
+    <div class="blob b"></div>
+    <div class="blob c"></div>
   </div>
 
-  <main class="app">
-    <header class="hero">
-      <div class="hero-top">
-        <div class="avatar" aria-hidden="true">🌸</div>
-        <div class="hero-text">
-          <p class="brand" id="brand">Jihye Ledger</p>
-          <h1 id="appTitle">Sổ chi tiêu của Jihye</h1>
-          <p class="tagline" id="tagline">Theo dõi thu nhập mỗi ngày, chi tiêu khôn ngoan hơn</p>
-        </div>
-      </div>
-      <div class="lang-switch" role="tablist" aria-label="Language">
+  <div class="wrap">
+    <header>
+      <div class="avatar">🌸</div>
+      <p class="brand">Jihye Apps</p>
+      <h1 id="title">Các chương trình của Jihye</h1>
+      <p class="tagline" id="tagline">Chọn một ứng dụng để bắt đầu</p>
+      <div class="lang-switch" role="tablist">
         <button type="button" class="lang-btn active" data-lang="vi">🇻🇳 Tiếng Việt</button>
         <button type="button" class="lang-btn" data-lang="ko">🇰🇷 한국어</button>
       </div>
     </header>
 
-    <section class="date-bar">
-      <button type="button" class="nav-day" id="prevDay" aria-label="Previous day">‹</button>
-      <div class="date-center">
-        <input type="date" id="datePicker" />
-        <p class="date-label" id="dateLabel"></p>
-      </div>
-      <button type="button" class="nav-day" id="nextDay" aria-label="Next day">›</button>
+    <section class="grid">
+      <a class="card todo" href="apps/todo/index.html">
+        <div class="icon">✅</div>
+        <h2 id="todoTitle">To-Do List</h2>
+        <p id="todoDesc">Danh sách việc cần làm theo buổi sáng / trưa / chiều, song ngữ Việt–Hàn.</p>
+        <span class="go" id="todoGo">Mở ứng dụng →</span>
+      </a>
+
+      <a class="card weather" href="apps/weather/index.html">
+        <div class="icon">🌤️</div>
+        <h2 id="weatherTitle">Weather Bloom</h2>
+        <p id="weatherDesc">Dự báo thời tiết dễ thương với hiệu ứng trời, tìm theo thành phố hoặc vị trí.</p>
+        <span class="go" id="weatherGo">Mở ứng dụng →</span>
+      </a>
+
+      <a class="card ledger" href="apps/ledger/index.html">
+        <div class="icon">💰</div>
+        <h2 id="ledgerTitle">Jihye Ledger</h2>
+        <p id="ledgerDesc">Sổ thu nhập &amp; chi tiêu hằng ngày, biểu đồ theo loại, cảnh báo khi tiêu quá.</p>
+        <span class="go" id="ledgerGo">Mở ứng dụng →</span>
+      </a>
     </section>
 
-    <section class="summary-grid">
-      <article class="summary-card income">
-        <span class="sum-icon">💰</span>
-        <div>
-          <p class="sum-label" id="labelDailyIncome">Thu nhập ngày</p>
-          <p class="sum-value" id="dailyIncomeValue">0</p>
-        </div>
-      </article>
-      <article class="summary-card expense">
-        <span class="sum-icon">🧾</span>
-        <div>
-          <p class="sum-label" id="labelDailyExpense">Chi tiêu ngày</p>
-          <p class="sum-value" id="dailyExpenseValue">0</p>
-        </div>
-      </article>
-      <article class="summary-card remain" id="remainCard">
-        <span class="sum-icon" id="remainIcon">✨</span>
-        <div>
-          <p class="sum-label" id="labelRemain">Còn lại hôm nay</p>
-          <p class="sum-value" id="remainValue">0</p>
-        </div>
-      </article>
-    </section>
+    <footer id="footer">Made with ♥ for Jihye · itz.jihye</footer>
+  </div>
 
-    <div class="alert-banner hidden" id="alertBanner" role="alert">
-      <span class="alert-icon">⚠️</span>
-      <div>
-        <p class="alert-title" id="alertTitle"></p>
-        <p class="alert-tips" id="alertTips"></p>
-      </div>
-    </div>
+  <script>
+    const i18n = {
+      vi: {
+        title: "Các chương trình của Jihye",
+        tagline: "Chọn một ứng dụng để bắt đầu",
+        todoTitle: "To-Do List",
+        todoDesc: "Danh sách việc cần làm theo buổi sáng / trưa / chiều, song ngữ Việt–Hàn.",
+        weatherTitle: "Weather Bloom",
+        weatherDesc: "Dự báo thời tiết dễ thương với hiệu ứng trời, tìm theo thành phố hoặc vị trí.",
+        ledgerTitle: "Jihye Ledger",
+        ledgerDesc: "Sổ thu nhập & chi tiêu hằng ngày, biểu đồ theo loại, cảnh báo khi tiêu quá.",
+        go: "Mở ứng dụng →",
+        footer: "Made with ♥ for Jihye · itz.jihye",
+      },
+      ko: {
+        title: "지혜의 프로그램 모음",
+        tagline: "시작할 앱을 골라 주세요",
+        todoTitle: "할 일 목록",
+        todoDesc: "아침 / 점심 / 오후로 나눈 할 일 관리, 한국어·베트남어 지원.",
+        weatherTitle: "Weather Bloom",
+        weatherDesc: "귀여운 날씨 예보와 하늘 효과, 도시·현재 위치로 검색.",
+        ledgerTitle: "지혜의 가계부",
+        ledgerDesc: "하루 수입·지출 기록, 카테고리 차트, 과소비 알림.",
+        go: "앱 열기 →",
+        footer: "지혜를 위해 ♥ · itz.jihye",
+      },
+    };
 
-    <section class="panels">
-      <section class="panel">
-        <h2><span>💼</span> <span id="incomePanelTitle">Thu nhập</span></h2>
-        <form id="incomeForm" class="form-stack">
-          <label>
-            <span id="labelSalary">Lương / thu nhập ngày</span>
-            <div class="input-row">
-              <span class="prefix">₩ / ₫</span>
-              <input type="number" id="salaryInput" min="0" step="any" placeholder="0" required>
-            </div>
-          </label>
-          <label>
-            <span id="labelOtherIncome">Thu nhập khác</span>
-            <div class="input-row">
-              <span class="prefix">+</span>
-              <input type="number" id="otherIncomeInput" min="0" step="any" placeholder="0">
-            </div>
-          </label>
-          <button type="submit" class="btn primary" id="saveIncomeBtn">💾 Lưu thu nhập</button>
-        </form>
-        <p class="hint" id="incomeHint">Thu nhập ngày = lương ngày + thu nhập khác</p>
-      </section>
+    let lang = localStorage.getItem("jihye-hub-lang") || "vi";
 
-      <section class="panel">
-        <h2><span>🛒</span> <span id="expensePanelTitle">Thêm chi tiêu</span></h2>
-        <form id="expenseForm" class="form-stack">
-          <label>
-            <span id="labelCategory">Loại chi tiêu</span>
-            <select id="categorySelect"></select>
-          </label>
-          <label>
-            <span id="labelAmount">Số tiền</span>
-            <div class="input-row">
-              <span class="prefix">−</span>
-              <input type="number" id="amountInput" min="0" step="any" placeholder="0" required>
-            </div>
-          </label>
-          <label>
-            <span id="labelNote">Ghi chú</span>
-            <input type="text" id="noteInput" maxlength="60" placeholder="...">
-          </label>
-          <button type="submit" class="btn accent" id="addExpenseBtn">➕ Thêm chi tiêu</button>
-        </form>
-      </section>
-    </section>
+    function apply() {
+      const L = i18n[lang];
+      document.documentElement.lang = lang;
+      title.textContent = L.title;
+      tagline.textContent = L.tagline;
+      todoTitle.textContent = L.todoTitle;
+      todoDesc.textContent = L.todoDesc;
+      todoGo.textContent = L.go;
+      weatherTitle.textContent = L.weatherTitle;
+      weatherDesc.textContent = L.weatherDesc;
+      weatherGo.textContent = L.go;
+      ledgerTitle.textContent = L.ledgerTitle;
+      ledgerDesc.textContent = L.ledgerDesc;
+      ledgerGo.textContent = L.go;
+      footer.textContent = L.footer;
+      document.querySelectorAll(".lang-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.lang === lang);
+      });
+    }
 
-    <section class="panels chart-row">
-      <section class="panel chart-panel">
-        <h2><span>📊</span> <span id="chartTitle">Biểu đồ chi tiêu hôm nay</span></h2>
-        <div class="chart-wrap">
-          <canvas id="expenseChart" width="320" height="320" aria-label="Expense chart"></canvas>
-          <div class="chart-empty" id="chartEmpty">
-            <span>🍩</span>
-            <p id="chartEmptyText">Chưa có chi tiêu nào hôm nay</p>
-          </div>
-        </div>
-        <ul class="legend" id="chartLegend"></ul>
-      </section>
+    document.querySelectorAll(".lang-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        lang = btn.dataset.lang;
+        localStorage.setItem("jihye-hub-lang", lang);
+        apply();
+      });
+    });
 
-      <section class="panel list-panel">
-        <div class="list-head">
-          <h2><span>📝</span> <span id="listTitle">Danh sách đã thanh toán</span></h2>
-          <button type="button" class="btn ghost sm" id="clearDayBtn">🗑️</button>
-        </div>
-        <ul class="expense-list" id="expenseList"></ul>
-        <p class="empty-list" id="emptyList"></p>
-      </section>
-    </section>
-
-    <section class="panel tips-panel">
-      <h2><span>💡</span> <span id="tipsTitle">Gợi ý chi tiêu hợp lý</span></h2>
-      <ul class="tips-list" id="tipsList"></ul>
-      <div class="budget-bars" id="budgetBars"></div>
-    </section>
-
-    <footer class="footer">
-      <p id="footerText">Made with ♥ for Jihye</p>
-    </footer>
-  </main>
-
-  <script src="script.js"></script>
+    apply();
+  </script>
 </body>
 </html>

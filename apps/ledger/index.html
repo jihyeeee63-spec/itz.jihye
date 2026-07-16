@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jihye Ledger · 지혜의 가계부</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@400;700&family=Nunito:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+    <div class="sparkles" id="sparkles"></div>
+  </div>
+
+  <a class="home-link" href="../../index.html">← Jihye Apps</a>
+  <main class="app">
+    <header class="hero">
+      <div class="hero-top">
+        <div class="avatar" aria-hidden="true">🌸</div>
+        <div class="hero-text">
+          <p class="brand" id="brand">Jihye Ledger</p>
+          <h1 id="appTitle">Sổ chi tiêu của Jihye</h1>
+          <p class="tagline" id="tagline">Theo dõi thu nhập mỗi ngày, chi tiêu khôn ngoan hơn</p>
+        </div>
+      </div>
+      <div class="lang-switch" role="tablist" aria-label="Language">
+        <button type="button" class="lang-btn active" data-lang="vi">🇻🇳 Tiếng Việt</button>
+        <button type="button" class="lang-btn" data-lang="ko">🇰🇷 한국어</button>
+      </div>
+    </header>
+
+    <section class="date-bar">
+      <button type="button" class="nav-day" id="prevDay" aria-label="Previous day">‹</button>
+      <div class="date-center">
+        <input type="date" id="datePicker" />
+        <p class="date-label" id="dateLabel"></p>
+      </div>
+      <button type="button" class="nav-day" id="nextDay" aria-label="Next day">›</button>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card income">
+        <span class="sum-icon">💰</span>
+        <div>
+          <p class="sum-label" id="labelDailyIncome">Thu nhập ngày</p>
+          <p class="sum-value" id="dailyIncomeValue">0</p>
+        </div>
+      </article>
+      <article class="summary-card expense">
+        <span class="sum-icon">🧾</span>
+        <div>
+          <p class="sum-label" id="labelDailyExpense">Chi tiêu ngày</p>
+          <p class="sum-value" id="dailyExpenseValue">0</p>
+        </div>
+      </article>
+      <article class="summary-card remain" id="remainCard">
+        <span class="sum-icon" id="remainIcon">✨</span>
+        <div>
+          <p class="sum-label" id="labelRemain">Còn lại hôm nay</p>
+          <p class="sum-value" id="remainValue">0</p>
+        </div>
+      </article>
+    </section>
+
+    <div class="alert-banner hidden" id="alertBanner" role="alert">
+      <span class="alert-icon">⚠️</span>
+      <div>
+        <p class="alert-title" id="alertTitle"></p>
+        <p class="alert-tips" id="alertTips"></p>
+      </div>
+    </div>
+
+    <section class="panels">
+      <section class="panel">
+        <h2><span>💼</span> <span id="incomePanelTitle">Thu nhập</span></h2>
+        <form id="incomeForm" class="form-stack">
+          <label>
+            <span id="labelSalary">Lương / thu nhập ngày</span>
+            <div class="input-row">
+              <span class="prefix">₩ / ₫</span>
+              <input type="number" id="salaryInput" min="0" step="any" placeholder="0" required>
+            </div>
+          </label>
+          <label>
+            <span id="labelOtherIncome">Thu nhập khác</span>
+            <div class="input-row">
+              <span class="prefix">+</span>
+              <input type="number" id="otherIncomeInput" min="0" step="any" placeholder="0">
+            </div>
+          </label>
+          <button type="submit" class="btn primary" id="saveIncomeBtn">💾 Lưu thu nhập</button>
+        </form>
+        <p class="hint" id="incomeHint">Thu nhập ngày = lương ngày + thu nhập khác</p>
+      </section>
+
+      <section class="panel">
+        <h2><span>🛒</span> <span id="expensePanelTitle">Thêm chi tiêu</span></h2>
+        <form id="expenseForm" class="form-stack">
+          <label>
+            <span id="labelCategory">Loại chi tiêu</span>
+            <select id="categorySelect"></select>
+          </label>
+          <label>
+            <span id="labelAmount">Số tiền</span>
+            <div class="input-row">
+              <span class="prefix">−</span>
+              <input type="number" id="amountInput" min="0" step="any" placeholder="0" required>
+            </div>
+          </label>
+          <label>
+            <span id="labelNote">Ghi chú</span>
+            <input type="text" id="noteInput" maxlength="60" placeholder="...">
+          </label>
+          <button type="submit" class="btn accent" id="addExpenseBtn">➕ Thêm chi tiêu</button>
+        </form>
+      </section>
+    </section>
+
+    <section class="panels chart-row">
+      <section class="panel chart-panel">
+        <h2><span>📊</span> <span id="chartTitle">Biểu đồ chi tiêu hôm nay</span></h2>
+        <div class="chart-wrap">
+          <canvas id="expenseChart" width="320" height="320" aria-label="Expense chart"></canvas>
+          <div class="chart-empty" id="chartEmpty">
+            <span>🍩</span>
+            <p id="chartEmptyText">Chưa có chi tiêu nào hôm nay</p>
+          </div>
+        </div>
+        <ul class="legend" id="chartLegend"></ul>
+      </section>
+
+      <section class="panel list-panel">
+        <div class="list-head">
+          <h2><span>📝</span> <span id="listTitle">Danh sách đã thanh toán</span></h2>
+          <button type="button" class="btn ghost sm" id="clearDayBtn">🗑️</button>
+        </div>
+        <ul class="expense-list" id="expenseList"></ul>
+        <p class="empty-list" id="emptyList"></p>
+      </section>
+    </section>
+
+    <section class="panel tips-panel">
+      <h2><span>💡</span> <span id="tipsTitle">Gợi ý chi tiêu hợp lý</span></h2>
+      <ul class="tips-list" id="tipsList"></ul>
+      <div class="budget-bars" id="budgetBars"></div>
+    </section>
+
+    <footer class="footer">
+      <p id="footerText">Made with ♥ for Jihye</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

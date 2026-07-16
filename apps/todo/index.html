@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-shapes" aria-hidden="true">
+    <span class="shape s1"></span>
+    <span class="shape s2"></span>
+    <span class="shape s3"></span>
+  </div>
+
+  <a class="home-link" href="../../index.html">← Jihye Apps</a>
+  <main class="app">
+    <header class="header">
+      <div class="mascot">🌸</div>
+      <h1 id="title">Danh sách việc cần làm</h1>
+      <p id="subtitle">Hôm nay bạn muốn làm gì nào?</p>
+    </header>
+
+    <div class="lang-switch" role="tablist" aria-label="Language">
+      <button type="button" class="lang-btn active" data-lang="vi">🇻🇳 Tiếng Việt</button>
+      <button type="button" class="lang-btn" data-lang="ko">🇰🇷 한국어</button>
+    </div>
+
+    <section class="add-box">
+      <input type="text" id="taskInput" placeholder="Nhập công việc mới..." autocomplete="off">
+      <select id="timeSelect" class="time-select" aria-label="Khung thời gian">
+        <option value="morning">🌅 Sáng</option>
+        <option value="noon">☀️ Trưa</option>
+        <option value="afternoon">🌤️ Chiều</option>
+      </select>
+      <button type="button" id="addBtn">＋ Thêm</button>
+    </section>
+
+    <div class="progress-bar" aria-hidden="true">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <p class="progress-text" id="progressText">0 / 0 hoàn thành</p>
+
+    <div id="timeSections" class="time-sections"></div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

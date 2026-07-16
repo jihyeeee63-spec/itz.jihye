@@ -4,6 +4,23 @@
   box-sizing: border-box;
 }
 
+.home-link {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 50;
+  text-decoration: none;
+  font-family: "Nunito", "Noto Sans KR", sans-serif;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: #2d2438;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(45, 36, 56, 0.12);
+  backdrop-filter: blur(8px);
+}
+
 :root {
   --coral: #ff6b6b;
   --coral-deep: #e84855;
