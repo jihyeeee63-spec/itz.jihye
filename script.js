@@ -1,385 +1,581 @@
-const API_STORAGE_KEY = "weather-bloom-api-key";
-const LANG_KEY = "weather-bloom-lang";
-const LAST_CITY_KEY = "weather-bloom-city";
+const STORAGE_KEY = "jihye-ledger-v1";
+const LANG_KEY = "jihye-ledger-lang";
+
+const CATEGORIES = {
+  food: { icon: "🍱", color: "#ff8fab", key: "food" },
+  transport: { icon: "🚌", color: "#5dade2", key: "transport" },
+  shopping: { icon: "🛍️", color: "#f4a261", key: "shopping" },
+  other: { icon: "✨", color: "#a78bfa", key: "other" },
+};
+
+/** Recommended max % of daily income per category */
+const BUDGET_RATIO = {
+  food: 0.35,
+  transport: 0.15,
+  shopping: 0.2,
+  other: 0.15,
+};
 
 const i18n = {
   vi: {
-    appTitle: "Weather Bloom",
-    tagline: "Dự báo dễ thương cho ngày của bạn",
-    placeholder: "Nhập tên thành phố...",
-    humidity: "Độ ẩm",
-    wind: "Gió",
-    pressure: "Áp suất",
-    visibility: "Tầm nhìn",
-    forecastTitle: "Dự báo 5 ngày",
-    feelsLike: (t) => `Cảm giác như ${t}°C`,
-    apiHint: "Đã kết nối OpenWeatherMap",
-    apiDialogTitle: "Nhập API Key",
-    apiDialogDesc: "Lấy miễn phí tại openweathermap.org → My API keys",
-    apiSave: "Lưu",
-    apiCancel: "Hủy",
-    loading: "Đang tải thời tiết...",
-    locating: "Đang lấy vị trí...",
-    needKey: "Vui lòng nhập API key trước nhé!",
-    notFound: "Không tìm thấy thành phố này 😢",
-    networkError: "Lỗi kết nối. Thử lại sau nhé!",
-    locateError: "Không lấy được vị trí của bạn",
-    invalidKey: "API key không hợp lệ",
-    windUnit: "m/s",
-    days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+    brand: "Jihye Ledger",
+    appTitle: "Sổ chi tiêu của Jihye",
+    tagline: "Theo dõi thu nhập mỗi ngày, chi tiêu khôn ngoan hơn",
+    labelDailyIncome: "Thu nhập ngày",
+    labelDailyExpense: "Chi tiêu ngày",
+    labelRemain: "Còn lại hôm nay",
+    incomePanelTitle: "Thu nhập",
+    expensePanelTitle: "Thêm chi tiêu",
+    labelSalary: "Lương / thu nhập ngày",
+    labelOtherIncome: "Thu nhập khác",
+    saveIncomeBtn: "💾 Lưu thu nhập",
+    incomeHint: "Thu nhập ngày = lương ngày + thu nhập khác. Còn lại = thu nhập − chi tiêu.",
+    labelCategory: "Loại chi tiêu",
+    labelAmount: "Số tiền",
+    labelNote: "Ghi chú",
+    notePlaceholder: "VD: cơm trưa, vé xe buýt...",
+    addExpenseBtn: "➕ Thêm chi tiêu",
+    chartTitle: "Biểu đồ chi tiêu hôm nay",
+    chartEmptyText: "Chưa có chi tiêu nào hôm nay",
+    listTitle: "Danh sách đã thanh toán",
+    emptyList: "Hãy thêm khoản chi đầu tiên nhé 🌷",
+    tipsTitle: "Gợi ý chi tiêu hợp lý",
+    footerText: "Làm với ♥ dành cho Jihye",
     locale: "vi-VN",
-    owmLang: "vi",
+    currency: "VND",
+    currencySymbol: "₫",
+    cats: {
+      food: "Thực phẩm",
+      transport: "Phí di chuyển",
+      shopping: "Mua sắm",
+      other: "Khác",
+    },
+    alertOverspend: "Ôi không! Jihye đã tiêu quá thu nhập hôm nay 😱",
+    alertNear: "Cẩn thận — gần hết ngân sách ngày rồi!",
+    alertCategory: (name) => `Loại「${name}」đang tiêu hơi nhiều so với mức hợp lý.`,
+    tipOverspend:
+      "Hôm nay nên dừng mua sắm không cần thiết, ưu tiên ăn uống tiết kiệm và đi lại bằng phương tiện công cộng.",
+    tipNear:
+      "Còn ít tiền — hãy kiểm tra lại các khoản mua sắm và chỉ giữ chi tiêu thiết yếu.",
+    tipCategory: (name) =>
+      `Hãy giảm chi cho「${name}」: lập danh sách trước khi mua, so sánh giá, và tránh mua impulse.`,
+    tipHealthy: "Tuyệt! Jihye đang giữ ngân sách tốt. Tiếp tục ghi chép mỗi khoản nhé 💖",
+    tips: [
+      "🍱 Thực phẩm ~35% thu nhập ngày — nấu ăn tại nhà giúp tiết kiệm rõ rệt.",
+      "🚌 Di chuyển ~15% — ưu tiên đi bộ / xe buýt / tàu thay vì gọi xe thường xuyên.",
+      "🛍️ Mua sắm ~20% — chờ 24 giờ trước khi mua đồ không cần thiết.",
+      "✨ Khác ~15% — để dành một phần cho quỹ dự phòng nhỏ mỗi ngày.",
+      "💰 Quy tắc vàng: còn lại ≥ 15% thu nhập ngày trước khi ngủ.",
+    ],
+    confirmClear: "Xóa toàn bộ chi tiêu ngày này?",
+    ofIncome: "của thu nhập",
+    used: "đã dùng",
   },
   ko: {
-    appTitle: "Weather Bloom",
-    tagline: "귀여운 날씨 예보와 함께해요",
-    placeholder: "도시 이름을 입력하세요...",
-    humidity: "습도",
-    wind: "바람",
-    pressure: "기압",
-    visibility: "가시거리",
-    forecastTitle: "5일 예보",
-    feelsLike: (t) => `체감 온도 ${t}°C`,
-    apiHint: "OpenWeatherMap에 연결됨",
-    apiDialogTitle: "API 키 입력",
-    apiDialogDesc: "openweathermap.org → My API keys에서 무료로 발급",
-    apiSave: "저장",
-    apiCancel: "취소",
-    loading: "날씨를 불러오는 중...",
-    locating: "위치를 찾는 중...",
-    needKey: "먼저 API 키를 입력해 주세요!",
-    notFound: "도시를 찾을 수 없어요 😢",
-    networkError: "연결 오류. 다시 시도해 주세요!",
-    locateError: "위치를 가져올 수 없어요",
-    invalidKey: "API 키가 올바르지 않아요",
-    windUnit: "m/s",
-    days: ["일", "월", "화", "수", "목", "금", "토"],
+    brand: "Jihye Ledger",
+    appTitle: "지혜의 가계부",
+    tagline: "하루 수입을 기록하고, 더 현명하게 써요",
+    labelDailyIncome: "오늘의 수입",
+    labelDailyExpense: "오늘의 지출",
+    labelRemain: "오늘 남은 금액",
+    incomePanelTitle: "수입",
+    expensePanelTitle: "지출 추가",
+    labelSalary: "급여 / 하루 수입",
+    labelOtherIncome: "기타 수입",
+    saveIncomeBtn: "💾 수입 저장",
+    incomeHint: "하루 수입 = 급여 + 기타 수입. 남은 금액 = 수입 − 지출.",
+    labelCategory: "지출 카테고리",
+    labelAmount: "금액",
+    labelNote: "메모",
+    notePlaceholder: "예: 점심, 버스비...",
+    addExpenseBtn: "➕ 지출 추가",
+    chartTitle: "오늘 지출 차트",
+    chartEmptyText: "아직 오늘 지출이 없어요",
+    listTitle: "결제된 내역",
+    emptyList: "첫 지출을 추가해 보세요 🌷",
+    tipsTitle: "현명한 소비 팁",
+    footerText: "지혜를 위해 ♥ 로 만들었어요",
     locale: "ko-KR",
-    owmLang: "kr",
+    currency: "KRW",
+    currencySymbol: "₩",
+    cats: {
+      food: "식비",
+      transport: "교통비",
+      shopping: "쇼핑",
+      other: "기타",
+    },
+    alertOverspend: "앗! 오늘 수입보다 더 많이 썼어요 😱",
+    alertNear: "조심해요 — 하루 예산이 거의 다 찼어요!",
+    alertCategory: (name) => `「${name}」항목이 권장 비율보다 많아요.`,
+    tipOverspend:
+      "오늘은 불필요한 쇼핑을 멈추고, 식비는 절약하고 대중교통을 이용해 보세요.",
+    tipNear: "남은 금액이 적어요 — 쇼핑을 다시 확인하고 꼭 필요한 지출만 남겨요.",
+    tipCategory: (name) =>
+      `「${name}」지출을 줄여보세요: 장보기 전 목록 작성, 가격 비교, 충동구매 피하기.`,
+    tipHealthy: "좋아요! 예산을 잘 지키고 있어요. 계속 기록해 주세요 💖",
+    tips: [
+      "🍱 식비는 하루 수입의 약 35% — 집밥이 큰 절약이 돼요.",
+      "🚌 교통비는 약 15% — 걸어서 / 버스 / 지하철을 자주 타 보세요.",
+      "🛍️ 쇼핑은 약 20% — 불필요한 물건은 24시간 기다려 보세요.",
+      "✨ 기타는 약 15% — 작은 비상금도 매일 조금씩 남겨 두세요.",
+      "💰 황금 규칙: 잠들기 전 하루 수입의 15% 이상 남겨 두기.",
+    ],
+    confirmClear: "오늘 지출을 모두 삭제할까요?",
+    ofIncome: "수입 대비",
+    used: "사용",
   },
 };
 
-const DEFAULT_API_KEY = "ac2c26205b27b1d2a53de3669c467aa4";
-
 let currentLang = localStorage.getItem(LANG_KEY) || "vi";
-let apiKey = localStorage.getItem(API_STORAGE_KEY) || DEFAULT_API_KEY;
+let store = loadStore();
 
 const els = {
-  cityInput: document.getElementById("cityInput"),
-  searchBtn: document.getElementById("searchBtn"),
-  locateBtn: document.getElementById("locateBtn"),
-  status: document.getElementById("status"),
-  weatherCard: document.getElementById("weatherCard"),
-  forecastSection: document.getElementById("forecastSection"),
-  forecastList: document.getElementById("forecastList"),
-  cityName: document.getElementById("cityName"),
-  dateText: document.getElementById("dateText"),
-  temp: document.getElementById("temp"),
-  desc: document.getElementById("desc"),
-  feels: document.getElementById("feels"),
-  humidity: document.getElementById("humidity"),
-  wind: document.getElementById("wind"),
-  pressure: document.getElementById("pressure"),
-  visibility: document.getElementById("visibility"),
-  weatherIcon: document.getElementById("weatherIcon"),
-  mascot: document.getElementById("mascot"),
-  brandIcon: document.getElementById("brandIcon"),
+  brand: document.getElementById("brand"),
   appTitle: document.getElementById("appTitle"),
   tagline: document.getElementById("tagline"),
-  forecastTitle: document.getElementById("forecastTitle"),
-  labelHumidity: document.getElementById("labelHumidity"),
-  labelWind: document.getElementById("labelWind"),
-  labelPressure: document.getElementById("labelPressure"),
-  labelVisibility: document.getElementById("labelVisibility"),
-  apiHint: document.getElementById("apiHint"),
-  apiKeyBtn: document.getElementById("apiKeyBtn"),
-  apiDialog: document.getElementById("apiDialog"),
-  apiKeyInput: document.getElementById("apiKeyInput"),
-  apiDialogTitle: document.getElementById("apiDialogTitle"),
-  apiDialogDesc: document.getElementById("apiDialogDesc"),
-  apiSaveBtn: document.getElementById("apiSaveBtn"),
-  apiCancelBtn: document.getElementById("apiCancelBtn"),
-  apiForm: document.getElementById("apiForm"),
-  clouds: document.getElementById("clouds"),
-  rain: document.getElementById("rain"),
-  snow: document.getElementById("snow"),
+  labelDailyIncome: document.getElementById("labelDailyIncome"),
+  labelDailyExpense: document.getElementById("labelDailyExpense"),
+  labelRemain: document.getElementById("labelRemain"),
+  dailyIncomeValue: document.getElementById("dailyIncomeValue"),
+  dailyExpenseValue: document.getElementById("dailyExpenseValue"),
+  remainValue: document.getElementById("remainValue"),
+  remainCard: document.getElementById("remainCard"),
+  remainIcon: document.getElementById("remainIcon"),
+  alertBanner: document.getElementById("alertBanner"),
+  alertTitle: document.getElementById("alertTitle"),
+  alertTips: document.getElementById("alertTips"),
+  incomePanelTitle: document.getElementById("incomePanelTitle"),
+  expensePanelTitle: document.getElementById("expensePanelTitle"),
+  labelSalary: document.getElementById("labelSalary"),
+  labelOtherIncome: document.getElementById("labelOtherIncome"),
+  saveIncomeBtn: document.getElementById("saveIncomeBtn"),
+  incomeHint: document.getElementById("incomeHint"),
+  labelCategory: document.getElementById("labelCategory"),
+  labelAmount: document.getElementById("labelAmount"),
+  labelNote: document.getElementById("labelNote"),
+  noteInput: document.getElementById("noteInput"),
+  addExpenseBtn: document.getElementById("addExpenseBtn"),
+  chartTitle: document.getElementById("chartTitle"),
+  chartEmptyText: document.getElementById("chartEmptyText"),
+  chartEmpty: document.getElementById("chartEmpty"),
+  listTitle: document.getElementById("listTitle"),
+  emptyList: document.getElementById("emptyList"),
+  tipsTitle: document.getElementById("tipsTitle"),
+  tipsList: document.getElementById("tipsList"),
+  budgetBars: document.getElementById("budgetBars"),
+  footerText: document.getElementById("footerText"),
+  datePicker: document.getElementById("datePicker"),
+  dateLabel: document.getElementById("dateLabel"),
+  salaryInput: document.getElementById("salaryInput"),
+  otherIncomeInput: document.getElementById("otherIncomeInput"),
+  categorySelect: document.getElementById("categorySelect"),
+  amountInput: document.getElementById("amountInput"),
+  expenseList: document.getElementById("expenseList"),
+  chartLegend: document.getElementById("chartLegend"),
+  expenseChart: document.getElementById("expenseChart"),
+  incomeForm: document.getElementById("incomeForm"),
+  expenseForm: document.getElementById("expenseForm"),
+  prevDay: document.getElementById("prevDay"),
+  nextDay: document.getElementById("nextDay"),
+  clearDayBtn: document.getElementById("clearDayBtn"),
+  sparkles: document.getElementById("sparkles"),
 };
 
 function t() {
   return i18n[currentLang];
 }
 
+function todayKey(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function loadStore() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
+  return { days: {} };
+}
+
+function saveStore() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+}
+
+function ensureDay(key) {
+  if (!store.days[key]) {
+    store.days[key] = {
+      salary: 0,
+      otherIncome: 0,
+      expenses: [],
+    };
+  }
+  return store.days[key];
+}
+
+function formatMoney(n) {
+  const L = t();
+  const value = Math.round(Number(n) || 0);
+  try {
+    return new Intl.NumberFormat(L.locale, {
+      style: "currency",
+      currency: L.currency,
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString(L.locale)} ${L.currencySymbol}`;
+  }
+}
+
+function getSelectedDate() {
+  return els.datePicker.value || todayKey();
+}
+
+function dayTotals(day) {
+  const income = (Number(day.salary) || 0) + (Number(day.otherIncome) || 0);
+  const expense = day.expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+  const byCat = { food: 0, transport: 0, shopping: 0, other: 0 };
+  for (const e of day.expenses) {
+    if (byCat[e.category] != null) byCat[e.category] += Number(e.amount) || 0;
+  }
+  return { income, expense, remain: income - expense, byCat };
+}
+
 function applyLanguage() {
   const L = t();
-  document.documentElement.lang = currentLang === "ko" ? "ko" : "vi";
-  els.appTitle.textContent = L.appTitle;
-  els.tagline.textContent = L.tagline;
-  els.cityInput.placeholder = L.placeholder;
-  els.labelHumidity.textContent = L.humidity;
-  els.labelWind.textContent = L.wind;
-  els.labelPressure.textContent = L.pressure;
-  els.labelVisibility.textContent = L.visibility;
-  els.forecastTitle.textContent = L.forecastTitle;
-  els.apiHint.textContent = L.apiHint;
-  els.apiDialogTitle.textContent = L.apiDialogTitle;
-  els.apiDialogDesc.textContent = L.apiDialogDesc;
-  els.apiSaveBtn.textContent = L.apiSave;
-  els.apiCancelBtn.textContent = L.apiCancel;
+  document.documentElement.lang = currentLang;
+
+  const map = [
+    ["brand", L.brand],
+    ["appTitle", L.appTitle],
+    ["tagline", L.tagline],
+    ["labelDailyIncome", L.labelDailyIncome],
+    ["labelDailyExpense", L.labelDailyExpense],
+    ["labelRemain", L.labelRemain],
+    ["incomePanelTitle", L.incomePanelTitle],
+    ["expensePanelTitle", L.expensePanelTitle],
+    ["labelSalary", L.labelSalary],
+    ["labelOtherIncome", L.labelOtherIncome],
+    ["saveIncomeBtn", L.saveIncomeBtn],
+    ["incomeHint", L.incomeHint],
+    ["labelCategory", L.labelCategory],
+    ["labelAmount", L.labelAmount],
+    ["labelNote", L.labelNote],
+    ["addExpenseBtn", L.addExpenseBtn],
+    ["chartTitle", L.chartTitle],
+    ["chartEmptyText", L.chartEmptyText],
+    ["listTitle", L.listTitle],
+    ["tipsTitle", L.tipsTitle],
+    ["footerText", L.footerText],
+  ];
+
+  for (const [id, text] of map) {
+    if (els[id]) els[id].textContent = text;
+  }
+
+  els.noteInput.placeholder = L.notePlaceholder;
+  els.emptyList.textContent = L.emptyList;
 
   document.querySelectorAll(".lang-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.lang === currentLang);
   });
+
+  fillCategorySelect();
+  renderTips();
+  render();
 }
 
-function setStatus(message, type = "") {
-  els.status.textContent = message || "";
-  els.status.className = "status" + (type ? ` ${type}` : "");
+function fillCategorySelect() {
+  const L = t();
+  const current = els.categorySelect.value;
+  els.categorySelect.innerHTML = Object.keys(CATEGORIES)
+    .map((key) => {
+      const c = CATEGORIES[key];
+      return `<option value="${key}">${c.icon} ${L.cats[key]}</option>`;
+    })
+    .join("");
+  if (current && CATEGORIES[current]) els.categorySelect.value = current;
 }
 
-function ensureApiKey() {
-  if (apiKey) return true;
-  setStatus(t().needKey, "error");
-  els.apiDialog.showModal();
-  return false;
+function renderTips() {
+  const L = t();
+  els.tipsList.innerHTML = L.tips.map((tip) => `<li>${tip}</li>`).join("");
 }
 
-function buildUrl(endpoint, params) {
-  const url = new URL(`https://api.openweathermap.org/data/2.5/${endpoint}`);
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-  url.searchParams.set("appid", apiKey);
-  url.searchParams.set("units", "metric");
-  url.searchParams.set("lang", t().owmLang);
-  return url.toString();
+function updateDateLabel() {
+  const L = t();
+  const key = getSelectedDate();
+  const date = new Date(key + "T12:00:00");
+  els.dateLabel.textContent = date.toLocaleDateString(L.locale, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
-async function fetchWeather(params) {
-  if (!ensureApiKey()) return;
+function render() {
+  const key = getSelectedDate();
+  const day = ensureDay(key);
+  const { income, expense, remain, byCat } = dayTotals(day);
+  const L = t();
 
-  setStatus(t().loading, "loading");
-  els.weatherCard.classList.add("hidden");
-  els.forecastSection.classList.add("hidden");
+  els.salaryInput.value = day.salary || "";
+  els.otherIncomeInput.value = day.otherIncome || "";
 
-  try {
-    const [currentRes, forecastRes] = await Promise.all([
-      fetch(buildUrl("weather", params)),
-      fetch(buildUrl("forecast", params)),
-    ]);
+  els.dailyIncomeValue.textContent = formatMoney(income);
+  els.dailyExpenseValue.textContent = formatMoney(expense);
+  els.remainValue.textContent = formatMoney(remain);
 
-    if (currentRes.status === 401) {
-      setStatus(t().invalidKey, "error");
-      els.apiDialog.showModal();
-      return;
-    }
-    if (currentRes.status === 404) {
-      setStatus(t().notFound, "error");
-      return;
-    }
-    if (!currentRes.ok || !forecastRes.ok) {
-      setStatus(t().networkError, "error");
-      return;
-    }
+  els.remainCard.classList.remove("ok", "warn", "danger");
+  if (income > 0 && remain < 0) {
+    els.remainCard.classList.add("danger");
+    els.remainIcon.textContent = "🚨";
+  } else if (income > 0 && remain / income < 0.15) {
+    els.remainCard.classList.add("warn");
+    els.remainIcon.textContent = "😮";
+  } else {
+    els.remainCard.classList.add("ok");
+    els.remainIcon.textContent = remain >= 0 ? "✨" : "😮";
+  }
 
-    const current = await currentRes.json();
-    const forecast = await forecastRes.json();
+  renderAlert(income, expense, remain, byCat);
+  renderList(day);
+  renderChart(byCat, expense);
+  renderBudgetBars(income, byCat);
+  updateDateLabel();
+}
 
-    renderCurrent(current);
-    renderForecast(forecast);
-    applyTheme(current);
-    setStatus("");
-    localStorage.setItem(LAST_CITY_KEY, current.name);
-  } catch {
-    setStatus(t().networkError, "error");
+function renderAlert(income, expense, remain, byCat) {
+  const L = t();
+  let title = "";
+  let tip = "";
+  let tone = "warn";
+
+  const overCats = Object.keys(byCat).filter((k) => {
+    if (!income) return false;
+    return byCat[k] / income > BUDGET_RATIO[k] + 0.02;
+  });
+
+  if (income > 0 && remain < 0) {
+    title = L.alertOverspend;
+    tip = L.tipOverspend;
+    tone = "danger";
+  } else if (income > 0 && remain / income < 0.15 && expense > 0) {
+    title = L.alertNear;
+    tip = L.tipNear;
+    tone = "warn";
+  } else if (overCats.length) {
+    const name = L.cats[overCats[0]];
+    title = L.alertCategory(name);
+    tip = L.tipCategory(name);
+    tone = "warn";
+  } else if (expense > 0 && income > 0) {
+    title = L.tipHealthy;
+    tip = L.tips[4];
+    tone = "ok";
+  }
+
+  els.alertBanner.classList.remove("tone-ok", "tone-warn", "tone-danger");
+
+  if (title) {
+    els.alertBanner.classList.remove("hidden");
+    els.alertBanner.classList.add(`tone-${tone}`);
+    els.alertTitle.textContent = title;
+    els.alertTips.textContent = tip;
+  } else {
+    els.alertBanner.classList.add("hidden");
   }
 }
 
-function searchCity() {
-  const city = els.cityInput.value.trim();
-  if (!city) return;
-  fetchWeather({ q: city });
-}
+function renderList(day) {
+  const L = t();
+  const items = [...day.expenses].reverse();
 
-function locateMe() {
-  if (!ensureApiKey()) return;
-  if (!navigator.geolocation) {
-    setStatus(t().locateError, "error");
+  if (!items.length) {
+    els.expenseList.innerHTML = "";
+    els.emptyList.classList.remove("hidden");
     return;
   }
 
-  setStatus(t().locating, "loading");
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      fetchWeather({
-        lat: pos.coords.latitude,
-        lon: pos.coords.longitude,
-      });
-    },
-    () => setStatus(t().locateError, "error"),
-    { timeout: 10000 }
-  );
+  els.emptyList.classList.add("hidden");
+  els.expenseList.innerHTML = items
+    .map((e) => {
+      const cat = CATEGORIES[e.category] || CATEGORIES.other;
+      const name = L.cats[e.category] || L.cats.other;
+      return `
+        <li class="expense-item" data-id="${e.id}">
+          <div class="cat-icon" style="background:${cat.color}22">${cat.icon}</div>
+          <div class="meta">
+            <div class="name">${name}</div>
+            <div class="note">${e.note ? escapeHtml(e.note) : "—"}</div>
+          </div>
+          <div class="amount">−${formatMoney(e.amount)}</div>
+          <button type="button" class="delete-btn" data-delete="${e.id}" title="Delete">✕</button>
+        </li>
+      `;
+    })
+    .join("");
 }
 
-function mascotFor(weatherId, temp) {
-  if (weatherId >= 200 && weatherId < 300) return "⛈️";
-  if (weatherId >= 300 && weatherId < 600) return "🌧️";
-  if (weatherId >= 600 && weatherId < 700) return "❄️";
-  if (weatherId >= 700 && weatherId < 800) return "🌫️";
-  if (weatherId === 800) return temp >= 30 ? "🔥" : "☀️";
-  if (weatherId > 800) return "☁️";
-  return "🌤️";
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function themeFor(weatherId, temp, isNight) {
-  if (isNight && weatherId === 800) return "night";
-  if (weatherId >= 200 && weatherId < 300) return "storm";
-  if (weatherId >= 300 && weatherId < 600) return "rain";
-  if (weatherId >= 600 && weatherId < 700) return "snow";
-  if (weatherId >= 700 && weatherId < 800) return "clouds";
-  if (weatherId === 800 && temp >= 28) return "hot";
-  if (weatherId === 800) return "clear";
-  if (weatherId > 800) return "clouds";
-  return "clear";
-}
+function renderChart(byCat, total) {
+  const canvas = els.expenseChart;
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const size = 320;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + "px";
+  canvas.style.height = size + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, size, size);
 
-function renderCurrent(data) {
+  const entries = Object.keys(CATEGORIES)
+    .map((k) => ({ key: k, value: byCat[k] || 0, ...CATEGORIES[k] }))
+    .filter((e) => e.value > 0);
+
   const L = t();
-  const weather = data.weather[0];
-  const temp = Math.round(data.main.temp);
-  const feels = Math.round(data.main.feels_like);
-  const icon = weather.icon;
 
-  els.cityName.textContent = `${data.name}${data.sys?.country ? `, ${data.sys.country}` : ""}`;
-  els.dateText.textContent = new Date().toLocaleDateString(L.locale, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-  els.temp.textContent = `${temp}°`;
-  els.desc.textContent = weather.description;
-  els.feels.textContent = L.feelsLike(feels);
-  els.humidity.textContent = `${data.main.humidity}%`;
-  els.wind.textContent = `${data.wind.speed} ${L.windUnit}`;
-  els.pressure.textContent = `${data.main.pressure} hPa`;
-  els.visibility.textContent = data.visibility
-    ? `${(data.visibility / 1000).toFixed(1)} km`
-    : "—";
-  els.weatherIcon.src = `https://openweathermap.org/img/wn/${icon}@4x.png`;
-  els.weatherIcon.alt = weather.description;
-  els.mascot.textContent = mascotFor(weather.id, temp);
-  els.brandIcon.textContent = mascotFor(weather.id, temp);
-
-  els.weatherCard.classList.remove("hidden");
-}
-
-function renderForecast(data) {
-  const L = t();
-  const byDay = new Map();
-
-  for (const item of data.list) {
-    const date = new Date(item.dt * 1000);
-    const key = date.toISOString().slice(0, 10);
-    const hour = date.getHours();
-    if (!byDay.has(key)) {
-      byDay.set(key, item);
-    } else {
-      const existing = byDay.get(key);
-      const existingHour = new Date(existing.dt * 1000).getHours();
-      if (Math.abs(hour - 12) < Math.abs(existingHour - 12)) {
-        byDay.set(key, item);
-      }
-    }
+  if (!entries.length || total <= 0) {
+    els.chartEmpty.classList.remove("hidden");
+    els.chartLegend.innerHTML = "";
+    return;
   }
 
-  const todayKey = new Date().toISOString().slice(0, 10);
-  const days = [...byDay.entries()]
-    .filter(([key]) => key !== todayKey)
-    .slice(0, 5);
+  els.chartEmpty.classList.add("hidden");
 
-  els.forecastList.innerHTML = days
-    .map(([key, item], i) => {
-      const date = new Date(item.dt * 1000);
-      const dayName = L.days[date.getDay()];
-      const temp = Math.round(item.main.temp);
-      const icon = item.weather[0].icon;
-      const desc = item.weather[0].description;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = 110;
+  const inner = 62;
+  let start = -Math.PI / 2;
+
+  entries.forEach((entry, i) => {
+    const slice = (entry.value / total) * Math.PI * 2;
+    const end = start + slice;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, start, end);
+    ctx.closePath();
+    ctx.fillStyle = entry.color;
+    ctx.globalAlpha = 0.92;
+    ctx.fill();
+
+    // soft separator
+    ctx.strokeStyle = "rgba(255,255,255,0.85)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, start, end);
+    ctx.stroke();
+
+    start = end;
+
+    // animate feel via slight delay styling on legend only
+    entry._i = i;
+  });
+
+  // donut hole
+  ctx.globalAlpha = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy, inner, 0, Math.PI * 2);
+  ctx.fillStyle = "#fffaf6";
+  ctx.fill();
+
+  ctx.fillStyle = "#2d2438";
+  ctx.font = "800 18px Nunito, Noto Sans KR, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(formatMoney(total), cx, cy - 8);
+  ctx.font = "700 12px Nunito, Noto Sans KR, sans-serif";
+  ctx.fillStyle = "#7a6f86";
+  ctx.fillText(L.labelDailyExpense, cx, cy + 14);
+
+  els.chartLegend.innerHTML = entries
+    .map((e) => {
+      const pct = Math.round((e.value / total) * 100);
       return `
-        <div class="forecast-item" style="animation-delay: ${i * 0.08}s">
-          <div class="f-day">${dayName}</div>
-          <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}">
-          <div class="f-temp">${temp}°</div>
-          <div class="f-desc">${desc}</div>
+        <li>
+          <span class="left">
+            <span class="dot" style="background:${e.color}"></span>
+            ${e.icon} ${L.cats[e.key]}
+          </span>
+          <span>${formatMoney(e.value)} · ${pct}%</span>
+        </li>
+      `;
+    })
+    .join("");
+}
+
+function renderBudgetBars(income, byCat) {
+  const L = t();
+  els.budgetBars.innerHTML = Object.keys(CATEGORIES)
+    .map((key) => {
+      const cat = CATEGORIES[key];
+      const spent = byCat[key] || 0;
+      const limit = income > 0 ? income * BUDGET_RATIO[key] : 0;
+      const ratio = income > 0 ? spent / income : 0;
+      const pctOfIncome = Math.min(100, Math.round(ratio * 100));
+      const fillPct =
+        limit > 0 ? Math.min(100, Math.round((spent / limit) * 100)) : spent > 0 ? 100 : 0;
+      const over = income > 0 && ratio > BUDGET_RATIO[key];
+
+      return `
+        <div class="budget-row">
+          <div class="top">
+            <span>${cat.icon} ${L.cats[key]} · ≤ ${Math.round(BUDGET_RATIO[key] * 100)}%</span>
+            <span>${pctOfIncome}% ${L.ofIncome}${over ? " ⚠️" : ""}</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${over ? "over" : ""}" style="width:${fillPct}%; background:${cat.color}"></div>
+          </div>
         </div>
       `;
     })
     .join("");
 
-  els.forecastSection.classList.remove("hidden");
+  // trigger width animation
+  requestAnimationFrame(() => {
+    els.budgetBars.querySelectorAll(".bar-fill").forEach((el) => {
+      const w = el.style.width;
+      el.style.width = "0";
+      requestAnimationFrame(() => {
+        el.style.width = w;
+      });
+    });
+  });
 }
 
-function applyTheme(data) {
-  const weather = data.weather[0];
-  const temp = data.main.temp;
-  const isNight = weather.icon.includes("n");
-  const theme = themeFor(weather.id, temp, isNight);
-  document.body.dataset.theme = theme;
-  spawnEffects(theme);
+function shiftDay(delta) {
+  const current = new Date(getSelectedDate() + "T12:00:00");
+  current.setDate(current.getDate() + delta);
+  els.datePicker.value = todayKey(current);
+  render();
 }
 
-function clearEffects() {
-  els.clouds.innerHTML = "";
-  els.rain.innerHTML = "";
-  els.snow.innerHTML = "";
-}
-
-function spawnEffects(theme) {
-  clearEffects();
-
-  const cloudCount =
-    theme === "clouds" || theme === "rain" || theme === "storm"
-      ? 6
-      : theme === "clear" || theme === "hot"
-        ? 2
-        : 3;
-
-  for (let i = 0; i < cloudCount; i++) {
-    const cloud = document.createElement("div");
-    cloud.className = "cloud";
-    const w = 80 + Math.random() * 120;
-    cloud.style.width = `${w}px`;
-    cloud.style.height = `${w * 0.35}px`;
-    cloud.style.top = `${8 + Math.random() * 45}%`;
-    cloud.style.left = `${-20 + Math.random() * 40}%`;
-    cloud.style.animationDuration = `${28 + Math.random() * 40}s`;
-    cloud.style.animationDelay = `${-Math.random() * 30}s`;
-    cloud.style.opacity = theme === "storm" ? "0.55" : "";
-    els.clouds.appendChild(cloud);
-  }
-
-  if (theme === "rain" || theme === "storm") {
-    const count = theme === "storm" ? 70 : 45;
-    for (let i = 0; i < count; i++) {
-      const drop = document.createElement("div");
-      drop.className = "drop";
-      drop.style.left = `${Math.random() * 100}%`;
-      drop.style.top = `${-10 - Math.random() * 20}%`;
-      drop.style.animationDuration = `${0.55 + Math.random() * 0.7}s`;
-      drop.style.animationDelay = `${Math.random() * 2}s`;
-      els.rain.appendChild(drop);
-    }
-  }
-
-  if (theme === "snow") {
-    for (let i = 0; i < 40; i++) {
-      const flake = document.createElement("div");
-      flake.className = "flake";
-      const size = 4 + Math.random() * 8;
-      flake.style.width = `${size}px`;
-      flake.style.height = `${size}px`;
-      flake.style.left = `${Math.random() * 100}%`;
-      flake.style.top = `${-10 - Math.random() * 20}%`;
-      flake.style.animationDuration = `${4 + Math.random() * 6}s`;
-      flake.style.animationDelay = `${Math.random() * 5}s`;
-      els.snow.appendChild(flake);
-    }
+function spawnSparkles() {
+  const icons = ["✦", "✧", "♡", "·"];
+  els.sparkles.innerHTML = "";
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement("span");
+    s.textContent = icons[i % icons.length];
+    s.style.left = `${Math.random() * 100}%`;
+    s.style.top = `${Math.random() * 100}%`;
+    s.style.animationDelay = `${Math.random() * 3}s`;
+    s.style.fontSize = `${0.6 + Math.random() * 0.9}rem`;
+    els.sparkles.appendChild(s);
   }
 }
 
@@ -389,43 +585,66 @@ document.querySelectorAll(".lang-btn").forEach((btn) => {
     currentLang = btn.dataset.lang;
     localStorage.setItem(LANG_KEY, currentLang);
     applyLanguage();
-    const city = els.cityInput.value.trim() || localStorage.getItem(LAST_CITY_KEY);
-    if (city && apiKey) {
-      els.cityInput.value = city;
-      fetchWeather({ q: city });
-    }
   });
 });
 
-els.searchBtn.addEventListener("click", searchCity);
-els.cityInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") searchCity();
-});
-els.locateBtn.addEventListener("click", locateMe);
+els.datePicker.addEventListener("change", render);
+els.prevDay.addEventListener("click", () => shiftDay(-1));
+els.nextDay.addEventListener("click", () => shiftDay(1));
 
-els.apiKeyBtn.addEventListener("click", () => {
-  els.apiKeyInput.value = apiKey;
-  els.apiDialog.showModal();
+els.incomeForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const day = ensureDay(getSelectedDate());
+  day.salary = Math.max(0, Number(els.salaryInput.value) || 0);
+  day.otherIncome = Math.max(0, Number(els.otherIncomeInput.value) || 0);
+  saveStore();
+  render();
 });
 
-els.apiForm.addEventListener("submit", (e) => {
-  const submitter = e.submitter;
-  if (submitter && submitter.value === "save") {
-    const key = els.apiKeyInput.value.trim() || DEFAULT_API_KEY;
-    apiKey = key;
-    localStorage.setItem(API_STORAGE_KEY, apiKey);
-    setStatus("");
-    const city = els.cityInput.value.trim() || localStorage.getItem(LAST_CITY_KEY) || "Hanoi";
-    els.cityInput.value = city;
-    fetchWeather({ q: city });
-  }
+els.expenseForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const amount = Number(els.amountInput.value);
+  if (!Number.isFinite(amount) || amount <= 0) return;
+
+  const day = ensureDay(getSelectedDate());
+  day.expenses.push({
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+    category: els.categorySelect.value,
+    amount,
+    note: els.noteInput.value.trim(),
+    createdAt: Date.now(),
+  });
+  saveStore();
+  els.amountInput.value = "";
+  els.noteInput.value = "";
+  render();
+});
+
+els.expenseList.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-delete]");
+  if (!btn) return;
+  const id = btn.getAttribute("data-delete");
+  const day = ensureDay(getSelectedDate());
+  day.expenses = day.expenses.filter((x) => x.id !== id);
+  saveStore();
+  render();
+});
+
+els.clearDayBtn.addEventListener("click", () => {
+  if (!confirm(t().confirmClear)) return;
+  const day = ensureDay(getSelectedDate());
+  day.expenses = [];
+  saveStore();
+  render();
+});
+
+window.addEventListener("resize", () => {
+  const day = ensureDay(getSelectedDate());
+  const { byCat, expense } = dayTotals(day);
+  renderChart(byCat, expense);
 });
 
 /* —— Init —— */
+els.datePicker.value = todayKey();
+spawnSparkles();
 applyLanguage();
-spawnEffects("clear");
-localStorage.setItem(API_STORAGE_KEY, apiKey);
-
-const savedCity = localStorage.getItem(LAST_CITY_KEY) || "Hanoi";
-els.cityInput.value = savedCity;
-fetchWeather({ q: savedCity });
