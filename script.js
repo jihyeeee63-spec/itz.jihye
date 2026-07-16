@@ -1,291 +1,431 @@
-const PERIODS = ["morning", "noon", "afternoon"];
-const STORAGE_KEY = "todo-tasks-shared-v1";
+const API_STORAGE_KEY = "weather-bloom-api-key";
+const LANG_KEY = "weather-bloom-lang";
+const LAST_CITY_KEY = "weather-bloom-city";
 
 const i18n = {
   vi: {
-    title: "Danh sách việc cần làm",
-    subtitle: "Hôm nay bạn muốn làm gì nào?",
-    placeholder: "Nhập công việc mới...",
-    addBtn: "＋ Thêm",
-    progress: (done, total) => `${done} / ${total} hoàn thành`,
-    empty: "Chưa có việc nào trong khung này",
-    periods: {
-      morning: { label: "Sáng", icon: "🌅", hint: "Buổi sáng" },
-      noon: { label: "Trưa", icon: "☀️", hint: "Buổi trưa" },
-      afternoon: { label: "Chiều", icon: "🌤️", hint: "Buổi chiều" },
-    },
+    appTitle: "Weather Bloom",
+    tagline: "Dự báo dễ thương cho ngày của bạn",
+    placeholder: "Nhập tên thành phố...",
+    humidity: "Độ ẩm",
+    wind: "Gió",
+    pressure: "Áp suất",
+    visibility: "Tầm nhìn",
+    forecastTitle: "Dự báo 5 ngày",
+    feelsLike: (t) => `Cảm giác như ${t}°C`,
+    apiHint: "Đã kết nối OpenWeatherMap",
+    apiDialogTitle: "Nhập API Key",
+    apiDialogDesc: "Lấy miễn phí tại openweathermap.org → My API keys",
+    apiSave: "Lưu",
+    apiCancel: "Hủy",
+    loading: "Đang tải thời tiết...",
+    locating: "Đang lấy vị trí...",
+    needKey: "Vui lòng nhập API key trước nhé!",
+    notFound: "Không tìm thấy thành phố này 😢",
+    networkError: "Lỗi kết nối. Thử lại sau nhé!",
+    locateError: "Không lấy được vị trí của bạn",
+    invalidKey: "API key không hợp lệ",
+    windUnit: "m/s",
+    days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+    locale: "vi-VN",
+    owmLang: "vi",
   },
   ko: {
-    title: "할 일 목록",
-    subtitle: "오늘 뭐 할 거예요?",
-    placeholder: "새 할 일 입력...",
-    addBtn: "＋ 추가",
-    progress: (done, total) => `${done} / ${total} 완료`,
-    empty: "이 시간대에 할 일이 없어요",
-    periods: {
-      morning: { label: "아침", icon: "🌅", hint: "오전" },
-      noon: { label: "점심", icon: "☀️", hint: "낮" },
-      afternoon: { label: "오후", icon: "🌤️", hint: "오후" },
-    },
+    appTitle: "Weather Bloom",
+    tagline: "귀여운 날씨 예보와 함께해요",
+    placeholder: "도시 이름을 입력하세요...",
+    humidity: "습도",
+    wind: "바람",
+    pressure: "기압",
+    visibility: "가시거리",
+    forecastTitle: "5일 예보",
+    feelsLike: (t) => `체감 온도 ${t}°C`,
+    apiHint: "OpenWeatherMap에 연결됨",
+    apiDialogTitle: "API 키 입력",
+    apiDialogDesc: "openweathermap.org → My API keys에서 무료로 발급",
+    apiSave: "저장",
+    apiCancel: "취소",
+    loading: "날씨를 불러오는 중...",
+    locating: "위치를 찾는 중...",
+    needKey: "먼저 API 키를 입력해 주세요!",
+    notFound: "도시를 찾을 수 없어요 😢",
+    networkError: "연결 오류. 다시 시도해 주세요!",
+    locateError: "위치를 가져올 수 없어요",
+    invalidKey: "API 키가 올바르지 않아요",
+    windUnit: "m/s",
+    days: ["일", "월", "화", "수", "목", "금", "토"],
+    locale: "ko-KR",
+    owmLang: "kr",
   },
 };
 
-const DEFAULT_TASKS = [
-  { textVi: "Tập thể dục", textKo: "운동하기", time: "morning" },
-  { textVi: "Ăn uống", textKo: "식사하기", time: "morning" },
-  { textVi: "Nấu ăn", textKo: "요리하기", time: "noon" },
-  { textVi: "Học tiếng Hàn", textKo: "한국어 공부하기", time: "afternoon" },
-];
+const DEFAULT_API_KEY = "ac2c26205b27b1d2a53de3669c467aa4";
 
-let currentLang = localStorage.getItem("todo-lang") || "vi";
-let tasks = loadTasks();
+let currentLang = localStorage.getItem(LANG_KEY) || "vi";
+let apiKey = localStorage.getItem(API_STORAGE_KEY) || DEFAULT_API_KEY;
 
-const titleEl = document.getElementById("title");
-const subtitleEl = document.getElementById("subtitle");
-const taskInput = document.getElementById("taskInput");
-const timeSelect = document.getElementById("timeSelect");
-const addBtn = document.getElementById("addBtn");
-const timeSections = document.getElementById("timeSections");
-const progressFill = document.getElementById("progressFill");
-const progressText = document.getElementById("progressText");
-const langBtns = document.querySelectorAll(".lang-btn");
+const els = {
+  cityInput: document.getElementById("cityInput"),
+  searchBtn: document.getElementById("searchBtn"),
+  locateBtn: document.getElementById("locateBtn"),
+  status: document.getElementById("status"),
+  weatherCard: document.getElementById("weatherCard"),
+  forecastSection: document.getElementById("forecastSection"),
+  forecastList: document.getElementById("forecastList"),
+  cityName: document.getElementById("cityName"),
+  dateText: document.getElementById("dateText"),
+  temp: document.getElementById("temp"),
+  desc: document.getElementById("desc"),
+  feels: document.getElementById("feels"),
+  humidity: document.getElementById("humidity"),
+  wind: document.getElementById("wind"),
+  pressure: document.getElementById("pressure"),
+  visibility: document.getElementById("visibility"),
+  weatherIcon: document.getElementById("weatherIcon"),
+  mascot: document.getElementById("mascot"),
+  brandIcon: document.getElementById("brandIcon"),
+  appTitle: document.getElementById("appTitle"),
+  tagline: document.getElementById("tagline"),
+  forecastTitle: document.getElementById("forecastTitle"),
+  labelHumidity: document.getElementById("labelHumidity"),
+  labelWind: document.getElementById("labelWind"),
+  labelPressure: document.getElementById("labelPressure"),
+  labelVisibility: document.getElementById("labelVisibility"),
+  apiHint: document.getElementById("apiHint"),
+  apiKeyBtn: document.getElementById("apiKeyBtn"),
+  apiDialog: document.getElementById("apiDialog"),
+  apiKeyInput: document.getElementById("apiKeyInput"),
+  apiDialogTitle: document.getElementById("apiDialogTitle"),
+  apiDialogDesc: document.getElementById("apiDialogDesc"),
+  apiSaveBtn: document.getElementById("apiSaveBtn"),
+  apiCancelBtn: document.getElementById("apiCancelBtn"),
+  apiForm: document.getElementById("apiForm"),
+  clouds: document.getElementById("clouds"),
+  rain: document.getElementById("rain"),
+  snow: document.getElementById("snow"),
+};
 
-function createDefaults() {
-  return DEFAULT_TASKS.map((item, i) => ({
-    id: String(i + 1),
-    textVi: item.textVi,
-    textKo: item.textKo,
-    time: item.time,
-    done: false,
-  }));
-}
-
-function getTaskText(task) {
-  if (currentLang === "ko") {
-    return task.textKo || task.textVi || task.text || "";
-  }
-  return task.textVi || task.textKo || task.text || "";
-}
-
-function normalizeTasks(list) {
-  return list.map((task, i) => {
-    const textVi = task.textVi || task.text || "";
-    const textKo = task.textKo || task.text || textVi;
-    return {
-      id: task.id || String(i + 1),
-      textVi,
-      textKo,
-      time: PERIODS.includes(task.time) ? task.time : "morning",
-      done: Boolean(task.done),
-    };
-  });
-}
-
-function loadTasks() {
-  const shared = localStorage.getItem(STORAGE_KEY);
-  if (shared) {
-    try {
-      return normalizeTasks(JSON.parse(shared));
-    } catch {
-      return createDefaults();
-    }
-  }
-
-  // Gộp dữ liệu cũ (nếu có) rồi chuyển sang lưu chung
-  const oldVi = localStorage.getItem("todo-tasks-v2-vi") || localStorage.getItem("todo-tasks-vi");
-  const oldKo = localStorage.getItem("todo-tasks-v2-ko") || localStorage.getItem("todo-tasks-ko");
-
-  if (oldVi || oldKo) {
-    try {
-      const viList = oldVi ? JSON.parse(oldVi) : [];
-      const koList = oldKo ? JSON.parse(oldKo) : [];
-      const merged = mergeOldLists(viList, koList);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-      return merged;
-    } catch {
-      return createDefaults();
-    }
-  }
-
-  return createDefaults();
-}
-
-function mergeOldLists(viList, koList) {
-  const maxLen = Math.max(viList.length, koList.length);
-  if (maxLen === 0) return createDefaults();
-
-  const result = [];
-  for (let i = 0; i < maxLen; i++) {
-    const vi = viList[i];
-    const ko = koList[i];
-    const textVi = (vi && (vi.textVi || vi.text)) || (ko && (ko.textVi || ko.text)) || "";
-    const textKo = (ko && (ko.textKo || ko.text)) || (vi && (vi.textKo || vi.text)) || textVi;
-    result.push({
-      id: (vi && vi.id) || (ko && ko.id) || String(i + 1),
-      textVi,
-      textKo,
-      time: PERIODS.includes((vi && vi.time) || (ko && ko.time))
-        ? (vi && vi.time) || (ko && ko.time)
-        : "morning",
-      done: Boolean((vi && vi.done) || (ko && ko.done)),
-    });
-  }
-  return result;
-}
-
-function saveTasks() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+function t() {
+  return i18n[currentLang];
 }
 
 function applyLanguage() {
-  const t = i18n[currentLang];
-  titleEl.textContent = t.title;
-  subtitleEl.textContent = t.subtitle;
-  taskInput.placeholder = t.placeholder;
-  addBtn.textContent = t.addBtn;
+  const L = t();
   document.documentElement.lang = currentLang === "ko" ? "ko" : "vi";
+  els.appTitle.textContent = L.appTitle;
+  els.tagline.textContent = L.tagline;
+  els.cityInput.placeholder = L.placeholder;
+  els.labelHumidity.textContent = L.humidity;
+  els.labelWind.textContent = L.wind;
+  els.labelPressure.textContent = L.pressure;
+  els.labelVisibility.textContent = L.visibility;
+  els.forecastTitle.textContent = L.forecastTitle;
+  els.apiHint.textContent = L.apiHint;
+  els.apiDialogTitle.textContent = L.apiDialogTitle;
+  els.apiDialogDesc.textContent = L.apiDialogDesc;
+  els.apiSaveBtn.textContent = L.apiSave;
+  els.apiCancelBtn.textContent = L.apiCancel;
 
-  PERIODS.forEach((period) => {
-    const option = timeSelect.querySelector(`option[value="${period}"]`);
-    if (option) {
-      option.textContent = `${t.periods[period].icon} ${t.periods[period].label}`;
-    }
+  document.querySelectorAll(".lang-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.lang === currentLang);
   });
 }
 
-function createTaskElement(task) {
-  const li = document.createElement("li");
-  li.className = "task-item" + (task.done ? " done" : "");
-
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.className = "task-checkbox";
-  checkbox.checked = task.done;
-  checkbox.addEventListener("change", () => toggleTask(task.id));
-
-  const span = document.createElement("span");
-  span.className = "task-text";
-  span.textContent = getTaskText(task);
-
-  const del = document.createElement("button");
-  del.type = "button";
-  del.className = "delete-btn";
-  del.textContent = "×";
-  del.setAttribute("aria-label", "Delete");
-  del.addEventListener("click", () => deleteTask(task.id));
-
-  li.appendChild(checkbox);
-  li.appendChild(span);
-  li.appendChild(del);
-  return li;
+function setStatus(message, type = "") {
+  els.status.textContent = message || "";
+  els.status.className = "status" + (type ? ` ${type}` : "");
 }
 
-function render() {
-  const t = i18n[currentLang];
-  timeSections.innerHTML = "";
+function ensureApiKey() {
+  if (apiKey) return true;
+  setStatus(t().needKey, "error");
+  els.apiDialog.showModal();
+  return false;
+}
 
-  PERIODS.forEach((period) => {
-    const sectionTasks = tasks.filter((task) => task.time === period);
-    const doneCount = sectionTasks.filter((task) => task.done).length;
+function buildUrl(endpoint, params) {
+  const url = new URL(`https://api.openweathermap.org/data/2.5/${endpoint}`);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  url.searchParams.set("appid", apiKey);
+  url.searchParams.set("units", "metric");
+  url.searchParams.set("lang", t().owmLang);
+  return url.toString();
+}
 
-    const section = document.createElement("section");
-    section.className = `time-section time-${period}`;
+async function fetchWeather(params) {
+  if (!ensureApiKey()) return;
 
-    const header = document.createElement("div");
-    header.className = "time-header";
-    header.innerHTML = `
-      <div class="time-title">
-        <span class="time-icon">${t.periods[period].icon}</span>
-        <div>
-          <h2>${t.periods[period].label}</h2>
-          <p>${t.periods[period].hint}</p>
-        </div>
-      </div>
-      <span class="time-count">${doneCount}/${sectionTasks.length}</span>
-    `;
+  setStatus(t().loading, "loading");
+  els.weatherCard.classList.add("hidden");
+  els.forecastSection.classList.add("hidden");
 
-    const list = document.createElement("ul");
-    list.className = "task-list";
+  try {
+    const [currentRes, forecastRes] = await Promise.all([
+      fetch(buildUrl("weather", params)),
+      fetch(buildUrl("forecast", params)),
+    ]);
 
-    if (sectionTasks.length === 0) {
-      const empty = document.createElement("li");
-      empty.className = "empty-msg small";
-      empty.textContent = t.empty;
-      list.appendChild(empty);
-    } else {
-      sectionTasks.forEach((task) => {
-        list.appendChild(createTaskElement(task));
-      });
+    if (currentRes.status === 401) {
+      setStatus(t().invalidKey, "error");
+      els.apiDialog.showModal();
+      return;
+    }
+    if (currentRes.status === 404) {
+      setStatus(t().notFound, "error");
+      return;
+    }
+    if (!currentRes.ok || !forecastRes.ok) {
+      setStatus(t().networkError, "error");
+      return;
     }
 
-    section.appendChild(header);
-    section.appendChild(list);
-    timeSections.appendChild(section);
-  });
+    const current = await currentRes.json();
+    const forecast = await forecastRes.json();
 
-  const done = tasks.filter((x) => x.done).length;
-  const total = tasks.length;
-  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-  progressFill.style.width = pct + "%";
-  progressText.textContent = t.progress(done, total);
+    renderCurrent(current);
+    renderForecast(forecast);
+    applyTheme(current);
+    setStatus("");
+    localStorage.setItem(LAST_CITY_KEY, current.name);
+  } catch {
+    setStatus(t().networkError, "error");
+  }
 }
 
-function addTask() {
-  const text = taskInput.value.trim();
-  if (!text) {
-    taskInput.focus();
+function searchCity() {
+  const city = els.cityInput.value.trim();
+  if (!city) return;
+  fetchWeather({ q: city });
+}
+
+function locateMe() {
+  if (!ensureApiKey()) return;
+  if (!navigator.geolocation) {
+    setStatus(t().locateError, "error");
     return;
   }
 
-  // Thêm vào cả 2 bản: cùng nội dung cho Việt và Hàn
-  tasks.unshift({
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    textVi: text,
-    textKo: text,
-    time: timeSelect.value,
-    done: false,
+  setStatus(t().locating, "loading");
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      fetchWeather({
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude,
+      });
+    },
+    () => setStatus(t().locateError, "error"),
+    { timeout: 10000 }
+  );
+}
+
+function mascotFor(weatherId, temp) {
+  if (weatherId >= 200 && weatherId < 300) return "⛈️";
+  if (weatherId >= 300 && weatherId < 600) return "🌧️";
+  if (weatherId >= 600 && weatherId < 700) return "❄️";
+  if (weatherId >= 700 && weatherId < 800) return "🌫️";
+  if (weatherId === 800) return temp >= 30 ? "🔥" : "☀️";
+  if (weatherId > 800) return "☁️";
+  return "🌤️";
+}
+
+function themeFor(weatherId, temp, isNight) {
+  if (isNight && weatherId === 800) return "night";
+  if (weatherId >= 200 && weatherId < 300) return "storm";
+  if (weatherId >= 300 && weatherId < 600) return "rain";
+  if (weatherId >= 600 && weatherId < 700) return "snow";
+  if (weatherId >= 700 && weatherId < 800) return "clouds";
+  if (weatherId === 800 && temp >= 28) return "hot";
+  if (weatherId === 800) return "clear";
+  if (weatherId > 800) return "clouds";
+  return "clear";
+}
+
+function renderCurrent(data) {
+  const L = t();
+  const weather = data.weather[0];
+  const temp = Math.round(data.main.temp);
+  const feels = Math.round(data.main.feels_like);
+  const icon = weather.icon;
+
+  els.cityName.textContent = `${data.name}${data.sys?.country ? `, ${data.sys.country}` : ""}`;
+  els.dateText.textContent = new Date().toLocaleDateString(L.locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
+  els.temp.textContent = `${temp}°`;
+  els.desc.textContent = weather.description;
+  els.feels.textContent = L.feelsLike(feels);
+  els.humidity.textContent = `${data.main.humidity}%`;
+  els.wind.textContent = `${data.wind.speed} ${L.windUnit}`;
+  els.pressure.textContent = `${data.main.pressure} hPa`;
+  els.visibility.textContent = data.visibility
+    ? `${(data.visibility / 1000).toFixed(1)} km`
+    : "—";
+  els.weatherIcon.src = `https://openweathermap.org/img/wn/${icon}@4x.png`;
+  els.weatherIcon.alt = weather.description;
+  els.mascot.textContent = mascotFor(weather.id, temp);
+  els.brandIcon.textContent = mascotFor(weather.id, temp);
 
-  saveTasks();
-  render();
-  taskInput.value = "";
-  taskInput.focus();
+  els.weatherCard.classList.remove("hidden");
 }
 
-function toggleTask(id) {
-  const task = tasks.find((x) => x.id === id);
-  if (!task) return;
-  task.done = !task.done;
-  saveTasks();
-  render();
+function renderForecast(data) {
+  const L = t();
+  const byDay = new Map();
+
+  for (const item of data.list) {
+    const date = new Date(item.dt * 1000);
+    const key = date.toISOString().slice(0, 10);
+    const hour = date.getHours();
+    if (!byDay.has(key)) {
+      byDay.set(key, item);
+    } else {
+      const existing = byDay.get(key);
+      const existingHour = new Date(existing.dt * 1000).getHours();
+      if (Math.abs(hour - 12) < Math.abs(existingHour - 12)) {
+        byDay.set(key, item);
+      }
+    }
+  }
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const days = [...byDay.entries()]
+    .filter(([key]) => key !== todayKey)
+    .slice(0, 5);
+
+  els.forecastList.innerHTML = days
+    .map(([key, item], i) => {
+      const date = new Date(item.dt * 1000);
+      const dayName = L.days[date.getDay()];
+      const temp = Math.round(item.main.temp);
+      const icon = item.weather[0].icon;
+      const desc = item.weather[0].description;
+      return `
+        <div class="forecast-item" style="animation-delay: ${i * 0.08}s">
+          <div class="f-day">${dayName}</div>
+          <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}">
+          <div class="f-temp">${temp}°</div>
+          <div class="f-desc">${desc}</div>
+        </div>
+      `;
+    })
+    .join("");
+
+  els.forecastSection.classList.remove("hidden");
 }
 
-function deleteTask(id) {
-  tasks = tasks.filter((x) => x.id !== id);
-  saveTasks();
-  render();
+function applyTheme(data) {
+  const weather = data.weather[0];
+  const temp = data.main.temp;
+  const isNight = weather.icon.includes("n");
+  const theme = themeFor(weather.id, temp, isNight);
+  document.body.dataset.theme = theme;
+  spawnEffects(theme);
 }
 
-function switchLang(lang) {
-  currentLang = lang;
-  localStorage.setItem("todo-lang", lang);
-  // Không load lại danh sách riêng — dùng chung 1 list
-  langBtns.forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.lang === lang);
+function clearEffects() {
+  els.clouds.innerHTML = "";
+  els.rain.innerHTML = "";
+  els.snow.innerHTML = "";
+}
+
+function spawnEffects(theme) {
+  clearEffects();
+
+  const cloudCount =
+    theme === "clouds" || theme === "rain" || theme === "storm"
+      ? 6
+      : theme === "clear" || theme === "hot"
+        ? 2
+        : 3;
+
+  for (let i = 0; i < cloudCount; i++) {
+    const cloud = document.createElement("div");
+    cloud.className = "cloud";
+    const w = 80 + Math.random() * 120;
+    cloud.style.width = `${w}px`;
+    cloud.style.height = `${w * 0.35}px`;
+    cloud.style.top = `${8 + Math.random() * 45}%`;
+    cloud.style.left = `${-20 + Math.random() * 40}%`;
+    cloud.style.animationDuration = `${28 + Math.random() * 40}s`;
+    cloud.style.animationDelay = `${-Math.random() * 30}s`;
+    cloud.style.opacity = theme === "storm" ? "0.55" : "";
+    els.clouds.appendChild(cloud);
+  }
+
+  if (theme === "rain" || theme === "storm") {
+    const count = theme === "storm" ? 70 : 45;
+    for (let i = 0; i < count; i++) {
+      const drop = document.createElement("div");
+      drop.className = "drop";
+      drop.style.left = `${Math.random() * 100}%`;
+      drop.style.top = `${-10 - Math.random() * 20}%`;
+      drop.style.animationDuration = `${0.55 + Math.random() * 0.7}s`;
+      drop.style.animationDelay = `${Math.random() * 2}s`;
+      els.rain.appendChild(drop);
+    }
+  }
+
+  if (theme === "snow") {
+    for (let i = 0; i < 40; i++) {
+      const flake = document.createElement("div");
+      flake.className = "flake";
+      const size = 4 + Math.random() * 8;
+      flake.style.width = `${size}px`;
+      flake.style.height = `${size}px`;
+      flake.style.left = `${Math.random() * 100}%`;
+      flake.style.top = `${-10 - Math.random() * 20}%`;
+      flake.style.animationDuration = `${4 + Math.random() * 6}s`;
+      flake.style.animationDelay = `${Math.random() * 5}s`;
+      els.snow.appendChild(flake);
+    }
+  }
+}
+
+/* —— Events —— */
+document.querySelectorAll(".lang-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    currentLang = btn.dataset.lang;
+    localStorage.setItem(LANG_KEY, currentLang);
+    applyLanguage();
+    const city = els.cityInput.value.trim() || localStorage.getItem(LAST_CITY_KEY);
+    if (city && apiKey) {
+      els.cityInput.value = city;
+      fetchWeather({ q: city });
+    }
   });
-  applyLanguage();
-  render();
-}
-
-addBtn.addEventListener("click", addTask);
-taskInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") addTask();
 });
 
-langBtns.forEach((btn) => {
-  btn.classList.toggle("active", btn.dataset.lang === currentLang);
-  btn.addEventListener("click", () => switchLang(btn.dataset.lang));
+els.searchBtn.addEventListener("click", searchCity);
+els.cityInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") searchCity();
+});
+els.locateBtn.addEventListener("click", locateMe);
+
+els.apiKeyBtn.addEventListener("click", () => {
+  els.apiKeyInput.value = apiKey;
+  els.apiDialog.showModal();
 });
 
+els.apiForm.addEventListener("submit", (e) => {
+  const submitter = e.submitter;
+  if (submitter && submitter.value === "save") {
+    const key = els.apiKeyInput.value.trim() || DEFAULT_API_KEY;
+    apiKey = key;
+    localStorage.setItem(API_STORAGE_KEY, apiKey);
+    setStatus("");
+    const city = els.cityInput.value.trim() || localStorage.getItem(LAST_CITY_KEY) || "Hanoi";
+    els.cityInput.value = city;
+    fetchWeather({ q: city });
+  }
+});
+
+/* —— Init —— */
 applyLanguage();
-render();
+spawnEffects("clear");
+localStorage.setItem(API_STORAGE_KEY, apiKey);
+
+const savedCity = localStorage.getItem(LAST_CITY_KEY) || "Hanoi";
+els.cityInput.value = savedCity;
+fetchWeather({ q: savedCity });

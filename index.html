@@ -3,24 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To-Do List</title>
+  <title>Weather Bloom</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="bg-shapes" aria-hidden="true">
-    <span class="shape s1"></span>
-    <span class="shape s2"></span>
-    <span class="shape s3"></span>
+<body data-theme="clear">
+  <div class="sky" aria-hidden="true">
+    <div class="sun" id="sun"></div>
+    <div class="clouds" id="clouds"></div>
+    <div class="rain" id="rain"></div>
+    <div class="snow" id="snow"></div>
   </div>
 
   <main class="app">
     <header class="header">
-      <div class="mascot">🌸</div>
-      <h1 id="title">Danh sách việc cần làm</h1>
-      <p id="subtitle">Hôm nay bạn muốn làm gì nào?</p>
+      <div class="brand">
+        <span class="brand-icon" id="brandIcon">🌤️</span>
+        <h1 id="appTitle">Weather Bloom</h1>
+      </div>
+      <p class="tagline" id="tagline">Dự báo dễ thương cho ngày của bạn</p>
     </header>
 
     <div class="lang-switch" role="tablist" aria-label="Language">
@@ -28,23 +31,81 @@
       <button type="button" class="lang-btn" data-lang="ko">🇰🇷 한국어</button>
     </div>
 
-    <section class="add-box">
-      <input type="text" id="taskInput" placeholder="Nhập công việc mới..." autocomplete="off">
-      <select id="timeSelect" class="time-select" aria-label="Khung thời gian">
-        <option value="morning">🌅 Sáng</option>
-        <option value="noon">☀️ Trưa</option>
-        <option value="afternoon">🌤️ Chiều</option>
-      </select>
-      <button type="button" id="addBtn">＋ Thêm</button>
+    <section class="search-box">
+      <input
+        type="text"
+        id="cityInput"
+        placeholder="Nhập tên thành phố..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button type="button" id="searchBtn" aria-label="Search">🔍</button>
+      <button type="button" id="locateBtn" class="locate-btn" title="Vị trí hiện tại">📍</button>
     </section>
 
-    <div class="progress-bar" aria-hidden="true">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-    <p class="progress-text" id="progressText">0 / 0 hoàn thành</p>
+    <p class="status" id="status" role="status"></p>
 
-    <div id="timeSections" class="time-sections"></div>
+    <section class="weather-card hidden" id="weatherCard">
+      <div class="weather-main">
+        <div class="weather-visual">
+          <img id="weatherIcon" src="" alt="" width="120" height="120">
+          <div class="mascot" id="mascot">☀️</div>
+        </div>
+        <div class="weather-info">
+          <h2 class="city-name" id="cityName">—</h2>
+          <p class="date-text" id="dateText">—</p>
+          <p class="temp" id="temp">—°</p>
+          <p class="desc" id="desc">—</p>
+          <p class="feels" id="feels">—</p>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-icon">💧</span>
+          <span class="stat-label" id="labelHumidity">Độ ẩm</span>
+          <span class="stat-value" id="humidity">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">💨</span>
+          <span class="stat-label" id="labelWind">Gió</span>
+          <span class="stat-value" id="wind">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">🌡️</span>
+          <span class="stat-label" id="labelPressure">Áp suất</span>
+          <span class="stat-value" id="pressure">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-icon">👁️</span>
+          <span class="stat-label" id="labelVisibility">Tầm nhìn</span>
+          <span class="stat-value" id="visibility">—</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="forecast-section hidden" id="forecastSection">
+      <h3 id="forecastTitle">Dự báo 5 ngày</h3>
+      <div class="forecast-list" id="forecastList"></div>
+    </section>
+
+    <footer class="api-note">
+      <p id="apiHint">Đã kết nối OpenWeatherMap</p>
+      <button type="button" id="apiKeyBtn" class="api-key-btn">🔑 Đổi API Key</button>
+    </footer>
   </main>
+
+  <dialog id="apiDialog" class="api-dialog">
+    <form method="dialog" id="apiForm">
+      <h3 id="apiDialogTitle">Nhập API Key</h3>
+      <p id="apiDialogDesc">Lấy miễn phí tại openweathermap.org</p>
+      <input type="password" id="apiKeyInput" placeholder="API Key..." autocomplete="off">
+      <div class="dialog-actions">
+        <button type="submit" value="save" id="apiSaveBtn">Lưu</button>
+        <button type="submit" value="cancel" class="ghost" id="apiCancelBtn">Hủy</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="script.js"></script>
 </body>
