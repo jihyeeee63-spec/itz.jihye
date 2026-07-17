@@ -133,7 +133,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 0.9rem;
     }
 
@@ -173,6 +173,9 @@
     .card.todo .icon { background: #ffe3ec; }
     .card.weather .icon { background: #d9f0ff; }
     .card.ledger .icon { background: #d8f3ef; }
+    .card.vocab .icon { background: #dff7c8; }
+
+    .card:nth-child(4) { animation-delay: 0.18s; }
 
     .card h2 {
       font-size: 1.15rem;
@@ -204,6 +207,10 @@
 
     @media (max-width: 760px) {
       .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: repeat(4, 1fr); }
     }
   </style>
 </head>
@@ -247,6 +254,13 @@
         <p id="ledgerDesc">Sổ thu nhập &amp; chi tiêu hằng ngày, biểu đồ theo loại, cảnh báo khi tiêu quá.</p>
         <span class="go" id="ledgerGo">Mở ứng dụng →</span>
       </a>
+
+      <a class="card vocab" href="apps/vocab/index.html">
+        <div class="icon">🏝️</div>
+        <h2 id="vocabTitle">Vocab Island</h2>
+        <p id="vocabDesc">Học từ vựng Hàn–Việt, trả lời đúng nhận vật liệu để xây đảo.</p>
+        <span class="go" id="vocabGo">Mở ứng dụng →</span>
+      </a>
     </section>
 
     <footer id="footer">Made with ♥ for Jihye · itz.jihye</footer>
@@ -263,6 +277,8 @@
         weatherDesc: "Dự báo thời tiết dễ thương với hiệu ứng trời, tìm theo thành phố hoặc vị trí.",
         ledgerTitle: "Jihye Ledger",
         ledgerDesc: "Sổ thu nhập & chi tiêu hằng ngày, biểu đồ theo loại, cảnh báo khi tiêu quá.",
+        vocabTitle: "Vocab Island",
+        vocabDesc: "Học từ vựng Hàn–Việt, trả lời đúng nhận vật liệu để xây đảo.",
         go: "Mở ứng dụng →",
         footer: "Made with ♥ for Jihye · itz.jihye",
       },
@@ -275,6 +291,8 @@
         weatherDesc: "귀여운 날씨 예보와 하늘 효과, 도시·현재 위치로 검색.",
         ledgerTitle: "지혜의 가계부",
         ledgerDesc: "하루 수입·지출 기록, 카테고리 차트, 과소비 알림.",
+        vocabTitle: "단어 섬",
+        vocabDesc: "한-베 단어 퀴즈로 자원을 모아 섬을 지어요.",
         go: "앱 열기 →",
         footer: "지혜를 위해 ♥ · itz.jihye",
       },
@@ -296,6 +314,9 @@
       ledgerTitle.textContent = L.ledgerTitle;
       ledgerDesc.textContent = L.ledgerDesc;
       ledgerGo.textContent = L.go;
+      vocabTitle.textContent = L.vocabTitle;
+      vocabDesc.textContent = L.vocabDesc;
+      vocabGo.textContent = L.go;
       footer.textContent = L.footer;
       document.querySelectorAll(".lang-btn").forEach((b) => {
         b.classList.toggle("active", b.dataset.lang === lang);

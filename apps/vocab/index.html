@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vocab Island · 단어 섬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@400;700&family=Nunito:wght@500;700;800&family=Noto+Sans+KR:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <span class="cloud c1"></span>
+    <span class="cloud c2"></span>
+    <span class="cloud c3"></span>
+    <span class="sun"></span>
+  </div>
+
+  <a class="home-link" href="../../index.html">← Jihye Apps</a>
+
+  <div class="topbar">
+    <div class="brand-row">
+      <span class="brand-mark">🏝️</span>
+      <div>
+        <p class="brand" id="brandName">Vocab Island</p>
+        <p class="brand-sub" id="brandSub">Học từ · Xây đảo</p>
+      </div>
+    </div>
+    <div class="lang-switch" role="tablist" aria-label="Language">
+      <button type="button" class="lang-btn active" data-lang="vi">VI</button>
+      <button type="button" class="lang-btn" data-lang="ko">한</button>
+    </div>
+  </div>
+
+  <div class="resources" id="resourcesBar" aria-live="polite">
+    <div class="res wood" title="Gỗ"><span>🪵</span><b id="resWood">0</b></div>
+    <div class="res stone" title="Đá"><span>🪨</span><b id="resStone">0</b></div>
+    <div class="res flower" title="Hoa"><span>🌸</span><b id="resFlower">0</b></div>
+    <div class="res coin" title="Xu"><span>🪙</span><b id="resCoin">0</b></div>
+  </div>
+
+  <!-- HOME -->
+  <main id="screen-home" class="screen active">
+    <section class="island-stage">
+      <div class="island" id="islandView">
+        <div class="water-ring"></div>
+        <div class="land">
+          <div class="grid" id="buildGrid"></div>
+        </div>
+        <div class="dock"></div>
+      </div>
+      <p class="island-tip" id="islandTip">Trả lời đúng để nhận vật liệu, rồi xây đảo của bạn!</p>
+    </section>
+
+    <section class="stats-row">
+      <div class="stat">
+        <span id="statXpLabel">XP</span>
+        <strong id="statXp">0</strong>
+      </div>
+      <div class="stat">
+        <span id="statStreakLabel">Chuỗi</span>
+        <strong id="statStreak">0</strong>
+      </div>
+      <div class="stat">
+        <span id="statWordsLabel">Từ</span>
+        <strong id="statWords">0</strong>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button type="button" class="btn primary big" id="btnStartQuiz">
+        <span class="btn-ico">🎯</span>
+        <span id="btnStartQuizText">Bắt đầu học</span>
+      </button>
+      <div class="actions-row">
+        <button type="button" class="btn secondary" id="btnBuild">
+          <span class="btn-ico">🏗️</span>
+          <span id="btnBuildText">Xây đảo</span>
+        </button>
+        <button type="button" class="btn secondary" id="btnUpload">
+          <span class="btn-ico">📄</span>
+          <span id="btnUploadText">Tải file</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- QUIZ -->
+  <main id="screen-quiz" class="screen">
+    <div class="quiz-head">
+      <button type="button" class="icon-btn" id="btnQuitQuiz" aria-label="Quit">✕</button>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="quizProgress"></div>
+      </div>
+      <div class="hearts" id="hearts" aria-label="lives">❤️❤️❤️</div>
+    </div>
+
+    <p class="quiz-dir" id="quizDir">Chọn nghĩa đúng</p>
+    <div class="prompt-card">
+      <p class="prompt-lang" id="promptLang">한국어</p>
+      <h2 class="prompt-word" id="promptWord">안녕하세요</h2>
+      <p class="prompt-hint" id="promptHint">Chọn bản dịch tiếng Việt</p>
+    </div>
+
+    <div class="choices" id="choices"></div>
+  </main>
+
+  <!-- FEEDBACK -->
+  <div id="feedbackSheet" class="feedback-sheet" hidden>
+    <div class="feedback-card" id="feedbackCard">
+      <p class="feedback-emoji" id="feedbackEmoji">🎉</p>
+      <h3 id="feedbackTitle">Chính xác!</h3>
+      <p id="feedbackDetail">안녕하세요 = Xin chào</p>
+      <p class="reward" id="feedbackReward">+1 🪵 Gỗ</p>
+      <button type="button" class="btn primary" id="btnNext">
+        <span id="btnNextText">Tiếp tục</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- BUILD -->
+  <main id="screen-build" class="screen">
+    <div class="panel-head">
+      <button type="button" class="icon-btn" id="btnBackHome1">←</button>
+      <h2 id="buildTitle">Xây đảo</h2>
+      <span></span>
+    </div>
+    <p class="panel-desc" id="buildDesc">Chọn công trình, rồi chạm ô trống trên đảo để xây.</p>
+
+    <div class="catalog" id="catalog"></div>
+
+    <section class="island-stage compact">
+      <div class="island build-mode" id="islandBuild">
+        <div class="water-ring"></div>
+        <div class="land">
+          <div class="grid" id="buildGridActive"></div>
+        </div>
+      </div>
+    </section>
+
+    <p class="selected-hint" id="selectedHint">Chưa chọn công trình</p>
+  </main>
+
+  <!-- UPLOAD -->
+  <main id="screen-upload" class="screen">
+    <div class="panel-head">
+      <button type="button" class="icon-btn" id="btnBackHome2">←</button>
+      <h2 id="uploadTitle">Tải từ vựng</h2>
+      <span></span>
+    </div>
+
+    <div class="upload-box" id="dropZone">
+      <input type="file" id="fileInput" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+      <p class="upload-emoji">📚</p>
+      <p id="uploadLead">Kéo thả Word / PDF hoặc nhấn để chọn</p>
+      <p class="upload-note" id="uploadNote">Mỗi dòng: 한국어 - tiếng Việt (hoặc dùng / · |). Hỗ trợ .docx, .doc, .pdf</p>
+      <button type="button" class="btn secondary" id="btnPickFile">
+        <span id="btnPickFileText">Chọn file Word / PDF</span>
+      </button>
+    </div>
+
+    <div class="upload-status" id="uploadStatus" hidden></div>
+
+    <section class="word-preview">
+      <div class="preview-head">
+        <h3 id="previewTitle">Từ vựng hiện có</h3>
+        <button type="button" class="link-btn" id="btnResetVocab">
+          <span id="btnResetVocabText">Khôi phục mẫu</span>
+        </button>
+      </div>
+      <ul class="word-list" id="wordList"></ul>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
