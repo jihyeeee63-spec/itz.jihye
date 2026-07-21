@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quan Bloom · Ô ăn quan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@400;700&family=Nunito:wght@600;700;800&family=Noto+Sans+KR:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob a"></div>
+    <div class="blob b"></div>
+    <div class="blob c"></div>
+    <div class="petal p1">❀</div>
+    <div class="petal p2">✿</div>
+    <div class="petal p3">❀</div>
+    <div class="petal p4">✿</div>
+  </div>
+
+  <a class="home-link" href="../../index.html">← Jihye Apps</a>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🍃</span>
+        <div>
+          <p class="brand-name">Quan Bloom</p>
+          <h1 id="appTitle">Ô ăn quan</h1>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div class="lang-switch" role="tablist" aria-label="Language">
+          <button type="button" class="lang-btn active" data-lang="vi">🇻🇳 Tiếng Việt</button>
+          <button type="button" class="lang-btn" data-lang="ko">🇰🇷 한국어</button>
+        </div>
+        <button type="button" class="btn ghost" id="newGameBtn">Ván mới</button>
+      </div>
+    </header>
+
+    <p class="tagline" id="tagline">Rải dân, ăn quan — trò chơi dân gian Việt Nam</p>
+
+    <section id="setupView" class="panel">
+      <h2 id="setupTitle">Thiết lập ván chơi</h2>
+      <p class="hint" id="setupHint">Đặt tên hai người chơi rồi bắt đầu</p>
+      <div class="name-grid">
+        <label class="name-card">
+          <span id="labelP1">Người chơi 1 (dưới)</span>
+          <input type="text" id="name1" maxlength="20" value="Jihye">
+        </label>
+        <label class="name-card">
+          <span id="labelP2">Người chơi 2 (trên)</span>
+          <input type="text" id="name2" maxlength="20" value="Bạn">
+        </label>
+      </div>
+      <button type="button" class="btn primary wide" id="startBtn">Bắt đầu</button>
+    </section>
+
+    <section id="gameView" class="game-wrap hidden">
+      <div class="scoreboard">
+        <div class="score-card p2" id="scoreCard2">
+          <strong id="scoreName2">Bạn</strong>
+          <p><span id="score2">0</span> <small id="scoreUnit2">điểm</small></p>
+        </div>
+        <div class="turn-box">
+          <p class="turn-line" id="turnLine">Lượt: Jihye</p>
+          <p class="status-line" id="statusLine">Chọn một ô dân của bạn để rải</p>
+        </div>
+        <div class="score-card p1" id="scoreCard1">
+          <strong id="scoreName1">Jihye</strong>
+          <p><span id="score1">0</span> <small id="scoreUnit1">điểm</small></p>
+        </div>
+      </div>
+
+      <div class="board-stage">
+        <div class="deco-corner tl" aria-hidden="true">🌿</div>
+        <div class="deco-corner tr" aria-hidden="true">🌿</div>
+        <div class="deco-corner bl" aria-hidden="true">🌸</div>
+        <div class="deco-corner br" aria-hidden="true">🌸</div>
+
+        <div class="board" id="board" aria-label="Ô ăn quan board">
+          <div class="board-ribbon" aria-hidden="true">
+            <span>✦</span><span id="boardRibbon">Ô ăn quan</span><span>✦</span>
+          </div>
+          <div class="row top" id="rowTop"></div>
+          <div class="quan-row">
+            <button type="button" class="pit quan" data-index="11" id="pit-11">
+              <span class="pit-label" id="quanLeftLabel">Quan</span>
+              <div class="stones" id="stones-11"></div>
+              <span class="count" id="count-11">10</span>
+            </button>
+            <div class="board-heart" aria-hidden="true">
+              <span class="heart-glow">❀</span>
+            </div>
+            <button type="button" class="pit quan" data-index="5" id="pit-5">
+              <span class="pit-label" id="quanRightLabel">Quan</span>
+              <div class="stones" id="stones-5"></div>
+              <span class="count" id="count-5">10</span>
+            </button>
+          </div>
+          <div class="row bottom" id="rowBottom"></div>
+        </div>
+      </div>
+
+      <p class="help" id="helpText">Chạm ô dân bên bạn, rồi chọn hướng rải trái hoặc phải.</p>
+    </section>
+
+    <div class="dir-modal hidden" id="dirModal" role="dialog" aria-modal="true" aria-labelledby="dirTitle">
+      <div class="dir-card">
+        <p class="dir-eyebrow" id="dirEyebrow">Chọn hướng rải</p>
+        <h2 id="dirTitle">Rải quân đi đâu?</h2>
+        <p class="dir-desc" id="dirDesc">Bạn có thể chọn bất kỳ hướng nào</p>
+        <div class="dir-actions">
+          <button type="button" class="dir-btn left" id="dirLeftBtn">
+            <span class="dir-arrow" aria-hidden="true">↺</span>
+            <strong id="dirLeftLabel">Sang trái</strong>
+            <small id="dirLeftHint">Ngược chiều kim đồng hồ</small>
+          </button>
+          <button type="button" class="dir-btn right" id="dirRightBtn">
+            <span class="dir-arrow" aria-hidden="true">↻</span>
+            <strong id="dirRightLabel">Sang phải</strong>
+            <small id="dirRightHint">Theo chiều kim đồng hồ</small>
+          </button>
+        </div>
+        <button type="button" class="btn ghost" id="dirCancelBtn">Hủy</button>
+      </div>
+    </div>
+
+    <div class="win-modal hidden" id="winModal" role="dialog" aria-modal="true">
+      <div class="win-card">
+        <div class="trophy" aria-hidden="true">🏆</div>
+        <p class="win-eyebrow" id="winEyebrow">Kết quả</p>
+        <h2 id="winTitle">Jihye thắng!</h2>
+        <p id="winDesc">10 - 8</p>
+        <button type="button" class="btn primary" id="winAgainBtn">Chơi lại</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

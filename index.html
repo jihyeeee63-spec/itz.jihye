@@ -209,7 +209,21 @@
       .grid { grid-template-columns: 1fr; }
     }
 
+    .card.recognizer .icon { background: #ffe0cc; }
+    .card.video .icon { background: #ffd6e0; }
+    .card.ludo .icon { background: #ffe9b5; }
+    .card.quan .icon { background: #d8f5ea; }
+
+    .card:nth-child(5) { animation-delay: 0.24s; }
+    .card:nth-child(6) { animation-delay: 0.3s; }
+    .card:nth-child(7) { animation-delay: 0.36s; }
+    .card:nth-child(8) { animation-delay: 0.42s; }
+
     @media (min-width: 900px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (min-width: 1200px) {
       .grid { grid-template-columns: repeat(4, 1fr); }
     }
   </style>
@@ -261,6 +275,34 @@
         <p id="vocabDesc">Học từ vựng Hàn–Việt, trả lời đúng nhận vật liệu để xây đảo.</p>
         <span class="go" id="vocabGo">Mở ứng dụng →</span>
       </a>
+
+      <a class="card recognizer" href="apps/recognizer/index.html">
+        <div class="icon">📷</div>
+        <h2 id="recognizerTitle">Lens Buddy</h2>
+        <p id="recognizerDesc">Nhận diện dog / cat / snake / rabbit / elephant bằng camera hoặc tải ảnh.</p>
+        <span class="go" id="recognizerGo">Mở ứng dụng →</span>
+      </a>
+
+      <a class="card video" href="apps/video/index.html">
+        <div class="icon">▶</div>
+        <h2 id="videoTitle">Clip Bloom</h2>
+        <p id="videoDesc">Nền tảng video kiểu YouTube: tải lên, lưu trên máy và phát lại ngay.</p>
+        <span class="go" id="videoGo">Mở ứng dụng →</span>
+      </a>
+
+      <a class="card ludo" href="apps/ludo/index.html">
+        <div class="icon">🐴</div>
+        <h2 id="ludoTitle">Horse Dash</h2>
+        <p id="ludoDesc">Cờ cá ngựa 2–4 người: gieo 1 hoặc 6 xuất quân, về đích có cúp &amp; thứ hạng.</p>
+        <span class="go" id="ludoGo">Mở ứng dụng →</span>
+      </a>
+
+      <a class="card quan" href="apps/quan/index.html">
+        <div class="icon">🍃</div>
+        <h2 id="quanTitle">Quan Bloom</h2>
+        <p id="quanDesc">Ô ăn quan 2 người: rải dân, ăn quan, đếm điểm dân gian Việt Nam.</p>
+        <span class="go" id="quanGo">Mở ứng dụng →</span>
+      </a>
     </section>
 
     <footer id="footer">Made with ♥ for Jihye · itz.jihye</footer>
@@ -279,6 +321,14 @@
         ledgerDesc: "Sổ thu nhập & chi tiêu hằng ngày, biểu đồ theo loại, cảnh báo khi tiêu quá.",
         vocabTitle: "Vocab Island",
         vocabDesc: "Học từ vựng Hàn–Việt, trả lời đúng nhận vật liệu để xây đảo.",
+        recognizerTitle: "Lens Buddy",
+        recognizerDesc: "Nhận diện dog / cat / snake / rabbit / elephant bằng camera hoặc tải ảnh.",
+        videoTitle: "Clip Bloom",
+        videoDesc: "Nền tảng video kiểu YouTube: tải lên, lưu trên máy và phát lại ngay.",
+        ludoTitle: "Horse Dash",
+        ludoDesc: "Cờ cá ngựa 2–4 người: gieo 1 hoặc 6 xuất quân, về đích có cúp & thứ hạng.",
+        quanTitle: "Quan Bloom",
+        quanDesc: "Ô ăn quan 2 người: rải dân, ăn quan, đếm điểm dân gian Việt Nam.",
         go: "Mở ứng dụng →",
         footer: "Made with ♥ for Jihye · itz.jihye",
       },
@@ -293,6 +343,14 @@
         ledgerDesc: "하루 수입·지출 기록, 카테고리 차트, 과소비 알림.",
         vocabTitle: "단어 섬",
         vocabDesc: "한-베 단어 퀴즈로 자원을 모아 섬을 지어요.",
+        recognizerTitle: "Lens Buddy",
+        recognizerDesc: "카메라 또는 사진 업로드로 dog / cat / snake / rabbit / elephant를 인식해요.",
+        videoTitle: "Clip Bloom",
+        videoDesc: "유튜브처럼 영상을 올리고, 기기에 저장해 바로 재생해요.",
+        ludoTitle: "Horse Dash",
+        ludoDesc: "2~4인용 루도: 1/6이면 출발, 골인 시 트로피와 순위.",
+        quanTitle: "Quan Bloom",
+        quanDesc: "2인 오안콴: 씨를 뿌리고 콴을 먹어 점수를 겨뤄요.",
         go: "앱 열기 →",
         footer: "지혜를 위해 ♥ · itz.jihye",
       },
@@ -317,6 +375,18 @@
       vocabTitle.textContent = L.vocabTitle;
       vocabDesc.textContent = L.vocabDesc;
       vocabGo.textContent = L.go;
+      recognizerTitle.textContent = L.recognizerTitle;
+      recognizerDesc.textContent = L.recognizerDesc;
+      recognizerGo.textContent = L.go;
+      videoTitle.textContent = L.videoTitle;
+      videoDesc.textContent = L.videoDesc;
+      videoGo.textContent = L.go;
+      ludoTitle.textContent = L.ludoTitle;
+      ludoDesc.textContent = L.ludoDesc;
+      ludoGo.textContent = L.go;
+      quanTitle.textContent = L.quanTitle;
+      quanDesc.textContent = L.quanDesc;
+      quanGo.textContent = L.go;
       footer.textContent = L.footer;
       document.querySelectorAll(".lang-btn").forEach((b) => {
         b.classList.toggle("active", b.dataset.lang === lang);

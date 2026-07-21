@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horse Dash · Cờ cá ngựa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@400;700&family=Nunito:wght@600;700;800&family=Noto+Sans+KR:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob a"></div>
+    <div class="blob b"></div>
+    <div class="blob c"></div>
+  </div>
+
+  <a class="home-link" href="../../index.html">← Jihye Apps</a>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🐴</span>
+        <div>
+          <p class="brand-name">Horse Dash</p>
+          <h1 id="appTitle">Cờ cá ngựa</h1>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div class="lang-switch" role="tablist" aria-label="Language">
+          <button type="button" class="lang-btn active" data-lang="vi">🇻🇳 Tiếng Việt</button>
+          <button type="button" class="lang-btn" data-lang="ko">🇰🇷 한국어</button>
+        </div>
+        <button type="button" class="btn ghost" id="newGameBtn">Ván mới</button>
+      </div>
+    </header>
+
+    <p class="tagline" id="tagline">Gieo xúc xắc, đưa ngựa về đích — vui cùng bạn bè</p>
+
+    <!-- Setup -->
+    <section id="setupView" class="panel">
+      <h2 id="setupTitle">Thiết lập ván chơi</h2>
+      <p class="hint" id="setupHint">Chọn số người chơi và bắt đầu</p>
+
+      <div class="setup-row">
+        <label class="field">
+          <span id="labelPlayers">Số người chơi</span>
+          <select id="playerCount">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="name-grid" id="nameGrid"></div>
+
+      <button type="button" class="btn primary wide" id="startBtn">Bắt đầu</button>
+    </section>
+
+    <!-- Game -->
+    <section id="gameView" class="game-layout hidden">
+      <aside class="side">
+        <div id="playersPanel" class="players-panel"></div>
+
+        <div class="dice-panel">
+          <p class="turn-line" id="turnLine">Lượt: Đỏ</p>
+          <p class="status-line" id="statusLine">Gieo xúc xắc để bắt đầu</p>
+          <button type="button" class="dice" id="diceBtn" aria-label="Roll dice">
+            <span id="diceFace">?</span>
+          </button>
+          <p class="dice-hint" id="diceHint">Chạm để gieo</p>
+        </div>
+      </aside>
+
+      <div class="board-wrap">
+        <div class="board" id="board" aria-label="Ludo board"></div>
+      </div>
+    </section>
+
+    <div class="finish-modal hidden" id="finishModal" role="dialog" aria-modal="true">
+      <div class="finish-card">
+        <div class="trophy-bounce" aria-hidden="true">🏆</div>
+        <p class="finish-rank" id="finishRank">Hạng #1</p>
+        <h2 id="finishTitle">Ngựa về đích!</h2>
+        <p id="finishDesc">Chúc mừng!</p>
+        <button type="button" class="btn primary" id="finishOkBtn">Tiếp tục</button>
+      </div>
+    </div>
+
+    <div class="win-modal hidden" id="winModal" role="dialog" aria-modal="true">
+      <div class="win-card">
+        <div class="trophy-big" aria-hidden="true">🏆</div>
+        <p class="win-eyebrow" id="winEyebrow">Chiến thắng</p>
+        <h2 id="winTitle">Đỏ thắng!</h2>
+        <p id="winDesc">Tất cả ngựa đã về đích.</p>
+        <ol class="finish-board" id="finishBoard"></ol>
+        <button type="button" class="btn primary" id="winAgainBtn">Chơi lại</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

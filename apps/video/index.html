@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clip Bloom · 클립 블룸</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@400;700&family=Nunito:wght@600;700;800&family=Noto+Sans+KR:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob a"></div>
+    <div class="blob b"></div>
+    <div class="blob c"></div>
+  </div>
+
+  <a class="home-link" href="../../index.html">← Jihye Apps</a>
+
+  <main class="app">
+    <!-- Library view -->
+    <section id="libraryView" class="view">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">▶</span>
+          <div>
+            <p class="brand-name">Clip Bloom</p>
+            <h1 id="appTitle">Nền tảng video của bạn</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="lang-switch" role="tablist" aria-label="Language">
+            <button type="button" class="lang-btn active" data-lang="vi">🇻🇳 Tiếng Việt</button>
+            <button type="button" class="lang-btn" data-lang="ko">🇰🇷 한국어</button>
+          </div>
+          <div class="account-bar">
+            <button type="button" class="icon-btn" id="notifBtn" aria-label="Notifications" title="Thông báo">
+              <span aria-hidden="true">🔔</span>
+              <span class="notif-dot hidden" id="notifDot"></span>
+            </button>
+            <button type="button" class="btn ghost tiny" id="authOpenBtn">Đăng ký</button>
+            <div class="user-chip hidden" id="userChip">
+              <span class="user-avatar" id="userAvatar">A</span>
+              <span id="userNameLabel">User</span>
+              <button type="button" class="text-btn" id="logoutBtn">Thoát</button>
+            </div>
+          </div>
+          <button type="button" class="btn primary" id="uploadBtn">＋ Tải lên</button>
+        </div>
+      </header>
+
+      <p class="tagline" id="tagline">Tải lên và xem lại video ngay trên trình duyệt</p>
+
+      <div class="channel-card" id="channelCard">
+        <div class="channel-info">
+          <div class="channel-avatar" aria-hidden="true">▶</div>
+          <div>
+            <p class="channel-name">Clip Bloom</p>
+            <p class="channel-meta" id="channelMeta">Tham gia để nhận thông báo video mới</p>
+          </div>
+        </div>
+        <div class="channel-actions">
+          <button type="button" class="btn primary" id="joinBtn">Tham gia</button>
+          <label class="notify-toggle hidden" id="notifyToggleWrap">
+            <input type="checkbox" id="notifyToggle">
+            <span id="notifyToggleLabel">Nhận thông báo</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="search-row">
+        <label class="search-wrap">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input type="search" id="searchInput" placeholder="Tìm video..." autocomplete="off">
+        </label>
+      </div>
+
+      <div class="library-tabs" role="tablist" aria-label="Library filter">
+        <button type="button" class="filter-btn active" data-filter="all" id="filterAll">Tất cả</button>
+        <button type="button" class="filter-btn" data-filter="saved" id="filterSaved">Đã lưu</button>
+        <button type="button" class="filter-btn" data-filter="history" id="filterHistory">Lịch sử</button>
+      </div>
+
+      <div class="section-head">
+        <h2 class="section-title" id="sectionTitle">Thư viện của bạn</h2>
+        <div class="section-actions">
+          <p class="count" id="videoCount"></p>
+          <button type="button" class="btn ghost tiny hidden" id="clearHistoryBtn">Xóa lịch sử</button>
+        </div>
+      </div>
+
+      <div id="videoGrid" class="video-grid"></div>
+      <div id="emptyState" class="empty hidden">
+        <div class="empty-icon" aria-hidden="true">▶</div>
+        <p id="emptyText">Chưa có video nào. Hãy tải lên video đầu tiên!</p>
+        <button type="button" class="btn primary" id="emptyUploadBtn">＋ Tải video đầu tiên</button>
+      </div>
+    </section>
+
+    <!-- Upload view -->
+    <section id="uploadView" class="view hidden">
+      <header class="header compact">
+        <button type="button" class="back-btn" id="backFromUpload">←</button>
+        <div>
+          <p class="brand-name">Clip Bloom</p>
+          <h1 id="uploadTitle">Tải video lên</h1>
+        </div>
+      </header>
+
+      <form id="uploadForm" class="upload-form">
+        <label class="dropzone" id="dropzone" for="videoFile">
+          <input type="file" id="videoFile" accept="video/*" required hidden>
+          <div class="dropzone-inner">
+            <span class="drop-icon">📁</span>
+            <p id="dropHint">Chọn hoặc kéo thả file video vào đây</p>
+            <p class="file-name" id="fileName"></p>
+          </div>
+          <video id="previewVideo" class="preview-video hidden" muted playsinline></video>
+        </label>
+
+        <label class="field">
+          <span id="labelTitle">Tiêu đề</span>
+          <input type="text" id="videoTitle" required maxlength="120" placeholder="Tên video của bạn">
+        </label>
+
+        <label class="field">
+          <span id="labelDesc">Mô tả</span>
+          <textarea id="videoDesc" rows="3" maxlength="500" placeholder="Mô tả ngắn (không bắt buộc)"></textarea>
+        </label>
+
+        <div class="subtitle-upload">
+          <p class="subtitle-upload-title" id="subtitleUploadTitle">Phụ đề (tuỳ chọn · .vtt / .srt)</p>
+          <div class="subtitle-upload-grid">
+            <label class="sub-file">
+              <span id="labelSubVi">Tiếng Việt</span>
+              <input type="file" id="subFileVi" accept=".vtt,.srt,text/vtt,text/plain">
+            </label>
+            <label class="sub-file">
+              <span id="labelSubEn">English</span>
+              <input type="file" id="subFileEn" accept=".vtt,.srt,text/vtt,text/plain">
+            </label>
+            <label class="sub-file">
+              <span id="labelSubKo">한국어</span>
+              <input type="file" id="subFileKo" accept=".vtt,.srt,text/vtt,text/plain">
+            </label>
+          </div>
+        </div>
+
+        <p class="form-hint" id="formHint">Video được lưu trên máy bạn (IndexedDB), không gửi lên server.</p>
+        <p class="form-error hidden" id="formError"></p>
+
+        <div class="form-actions">
+          <button type="button" class="btn ghost" id="cancelUpload">Hủy</button>
+          <button type="submit" class="btn primary" id="submitUpload">Đăng video</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Player view -->
+    <section id="playerView" class="view hidden">
+      <header class="header compact">
+        <button type="button" class="back-btn" id="backFromPlayer">←</button>
+        <div>
+          <p class="brand-name">Clip Bloom</p>
+          <h1 id="playerHeading">Đang phát</h1>
+        </div>
+      </header>
+
+      <div class="player-shell" id="playerShell">
+        <video id="mainPlayer" controls playsinline crossorigin="anonymous"></video>
+      </div>
+
+      <div class="player-meta">
+        <h2 id="playerTitle"></h2>
+        <div class="stats-row" aria-live="polite">
+          <span class="stat-chip views" id="viewStat">0 lượt xem</span>
+          <span class="stat-chip" id="likeStat">0 thích</span>
+          <span class="stat-chip" id="qualityBadge">Auto</span>
+        </div>
+        <p class="meta-line" id="playerMeta"></p>
+        <p class="player-desc" id="playerDesc"></p>
+
+        <div class="playback-tools">
+          <label class="tool-field">
+            <span id="qualityLabel">Chất lượng</span>
+            <select id="qualitySelect">
+              <option value="auto">Auto</option>
+              <option value="1080">1080p</option>
+              <option value="720">720p</option>
+              <option value="480">480p</option>
+              <option value="360">360p</option>
+            </select>
+          </label>
+          <label class="tool-field">
+            <span id="speedLabel">Tốc độ</span>
+            <select id="speedSelect">
+              <option value="0.5">0.5x</option>
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1x</option>
+              <option value="1.5">1.5x</option>
+              <option value="2">2x</option>
+            </select>
+          </label>
+          <label class="tool-field">
+            <span id="subtitleLabel">Phụ đề</span>
+            <select id="subtitleSelect">
+              <option value="off">Tắt</option>
+              <option value="vi">Tiếng Việt</option>
+              <option value="en">English</option>
+              <option value="ko">한국어</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="add-sub-row">
+          <label class="tool-field grow">
+            <span id="addSubLabel">Thêm / đổi phụ đề</span>
+            <div class="add-sub-controls">
+              <select id="addSubLang">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+                <option value="ko">한국어</option>
+              </select>
+              <input type="file" id="addSubFile" accept=".vtt,.srt,text/vtt,text/plain">
+            </div>
+          </label>
+        </div>
+
+        <div class="action-bar" role="group" aria-label="Video actions">
+          <button type="button" class="action-btn" id="likeBtn" aria-pressed="false">
+            <span class="action-icon" aria-hidden="true">▲</span>
+            <span id="likeLabel">Thích</span>
+            <span class="action-count" id="likeCount">0</span>
+          </button>
+          <button type="button" class="action-btn" id="dislikeBtn" aria-pressed="false">
+            <span class="action-icon" aria-hidden="true">▼</span>
+            <span id="dislikeLabel">Không thích</span>
+            <span class="action-count" id="dislikeCount">0</span>
+          </button>
+          <button type="button" class="action-btn" id="saveBtn" aria-pressed="false">
+            <span class="action-icon" aria-hidden="true">★</span>
+            <span id="saveLabel">Lưu</span>
+          </button>
+          <button type="button" class="action-btn" id="downloadBtn">
+            <span class="action-icon" aria-hidden="true">↓</span>
+            <span id="downloadLabel">Tải xuống</span>
+          </button>
+          <button type="button" class="action-btn" id="shareBtn">
+            <span class="action-icon" aria-hidden="true">↗</span>
+            <span id="shareLabel">Chia sẻ</span>
+          </button>
+        </div>
+
+        <button type="button" class="btn danger" id="deleteBtn">Xóa video</button>
+      </div>
+
+      <section class="comments" aria-labelledby="commentsHeading">
+        <div class="section-head">
+          <h2 class="section-title" id="commentsHeading">Bình luận</h2>
+          <p class="count" id="commentCount"></p>
+        </div>
+
+        <form id="commentForm" class="comment-form">
+          <label class="field">
+            <span id="labelAuthor">Tên của bạn</span>
+            <input type="text" id="commentAuthor" maxlength="40" placeholder="Tên hiển thị" autocomplete="nickname">
+          </label>
+          <label class="field">
+            <span id="labelComment">Nội dung</span>
+            <textarea id="commentText" rows="3" maxlength="400" required placeholder="Viết bình luận..."></textarea>
+          </label>
+          <p class="form-error hidden" id="commentError"></p>
+          <div class="form-actions">
+            <button type="submit" class="btn primary" id="submitComment">Gửi bình luận</button>
+          </div>
+        </form>
+
+        <div id="commentList" class="comment-list"></div>
+        <p id="commentEmpty" class="comment-empty hidden">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+      </section>
+    </section>
+  </main>
+
+  <p class="share-toast hidden" id="shareToast" role="status" aria-live="polite"></p>
+
+  <div class="notif-panel hidden" id="notifPanel" role="dialog" aria-label="Notifications">
+    <div class="notif-head">
+      <h2 id="notifTitle">Thông báo</h2>
+      <button type="button" class="text-btn" id="markAllReadBtn">Đọc tất cả</button>
+    </div>
+    <div id="notifList" class="notif-list"></div>
+    <p id="notifEmpty" class="notif-empty">Chưa có thông báo nào.</p>
+  </div>
+
+  <div class="modal-backdrop hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="authCloseBtn" aria-label="Close">×</button>
+      <h2 id="authTitle">Đăng ký Clip Bloom</h2>
+      <p class="modal-desc" id="authDesc">Tạo tài khoản để tham gia trang và nhận thông báo.</p>
+
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="filter-btn active" data-auth="register" id="tabRegister">Đăng ký</button>
+        <button type="button" class="filter-btn" data-auth="login" id="tabLogin">Đăng nhập</button>
+      </div>
+
+      <form id="authForm" class="auth-form">
+        <label class="field" id="nameFieldWrap">
+          <span id="labelName">Tên hiển thị</span>
+          <input type="text" id="authName" maxlength="40" autocomplete="nickname" placeholder="Tên của bạn">
+        </label>
+        <label class="field">
+          <span id="labelEmail">Email</span>
+          <input type="email" id="authEmail" required autocomplete="email" placeholder="email@example.com">
+        </label>
+        <label class="field">
+          <span id="labelPassword">Mật khẩu</span>
+          <input type="password" id="authPassword" required minlength="4" autocomplete="current-password" placeholder="Ít nhất 4 ký tự">
+        </label>
+        <p class="form-error hidden" id="authError"></p>
+        <button type="submit" class="btn primary full" id="authSubmit">Tạo tài khoản</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
